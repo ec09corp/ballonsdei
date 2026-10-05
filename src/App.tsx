@@ -287,10 +287,11 @@ function MainApp() {
           {/* Category Tabs with Gold Accent Indicators */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
             <button
+              type="button"
               onClick={() => setActiveCategoryFilter('all')}
-              className={`chip-tactile px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer transition-all ${
+              className={`px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] ${
                 activeCategoryFilter === 'all'
-                  ? 'bg-[#763D8B] text-white shadow-md shadow-[#763D8B]/20 border border-[#763D8B]'
+                  ? 'bg-[#763D8B] text-white shadow-sm border border-[#763D8B]'
                   : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
               }`}
             >
@@ -302,11 +303,12 @@ function MainApp() {
                 const isCurrent = activeCategoryFilter === cat.slug;
                 return (
                   <button
+                    type="button"
                     key={cat.id}
                     onClick={() => setActiveCategoryFilter(cat.slug)}
-                    className={`chip-tactile px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer transition-all ${
+                    className={`px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] ${
                       isCurrent
-                        ? 'bg-[#763D8B] text-white shadow-md shadow-[#763D8B]/20 border border-[#763D8B]'
+                        ? 'bg-[#763D8B] text-white shadow-sm border border-[#763D8B]'
                         : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
                     }`}
                   >

@@ -71,9 +71,9 @@ export const LocationSection: React.FC<LocationSectionProps> = ({ settings }) =>
                 href={safeMapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-medium uppercase tracking-wider rounded-lg shadow-sm transition-colors"
+                className="btn-tactile inline-flex items-center gap-2 px-6 py-3 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-semibold uppercase tracking-wider rounded-full shadow-xs transition-[background-color,transform] duration-150 active:scale-[0.97]"
               >
-                <Navigation className="w-3.5 h-3.5" />
+                <Navigation className="w-3.5 h-3.5 text-[#F3E2C4]" />
                 <span>Cómo Llegar en Maps</span>
               </a>
 
@@ -81,7 +81,7 @@ export const LocationSection: React.FC<LocationSectionProps> = ({ settings }) =>
                 href={`https://wa.me/${cleanPhone}?text=Hola%20${encodeURIComponent(settings.store_name || 'Ballonsdei')},%20quisiera%20consultar%20sobre%20una%20visita%20o%20pedido.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-[#F3EBF0] text-[#2B1D28] border border-[#D5C2B8] text-xs font-medium uppercase tracking-wider rounded-lg transition-colors"
+                className="btn-tactile inline-flex items-center gap-2 px-6 py-3 bg-white hover:bg-[#F3EBF0] text-[#241A23] border border-[#D5C2B8] text-xs font-semibold uppercase tracking-wider rounded-full transition-[background-color,border-color,transform] duration-150 active:scale-[0.97]"
               >
                 <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
                 <span>Escríbenos por WhatsApp</span>
@@ -108,9 +108,9 @@ export const LocationSection: React.FC<LocationSectionProps> = ({ settings }) =>
                   href={safeMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 px-5 py-2.5 bg-[#2B1D28] text-white text-xs rounded-lg shadow-xs hover:bg-[#402B3C] transition-colors flex items-center gap-2"
+                  className="btn-tactile mt-4 px-6 py-2.5 bg-[#241A23] hover:bg-[#3D2539] text-white text-xs font-semibold uppercase tracking-wider rounded-full shadow-xs transition-[background-color,transform] duration-150 active:scale-[0.97] flex items-center gap-2"
                 >
-                  <Navigation className="w-3.5 h-3.5" />
+                  <Navigation className="w-3.5 h-3.5 text-[#F3E2C4]" />
                   <span>Abrir en Google Maps</span>
                 </a>
               </div>

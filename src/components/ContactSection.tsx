@@ -51,7 +51,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
                 href={`https://wa.me/${cleanPhone}?text=Hola%20${encodeURIComponent(settings.store_name || 'Ballonsdei')},%20deseo%20hacer%20una%20consulta.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 rounded-xl bg-[#FAF7F9] border border-[#EADEE6] hover:border-[#763D8B] transition-all group"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-[#FAF7F9] border border-[#EADEE6] hover:border-[#763D8B] transition-[border-color,background-color] duration-150 group"
               >
                 <div className="w-10 h-10 rounded-full bg-[#25D366]/15 flex items-center justify-center text-[#25D366] shrink-0">
                   <MessageCircle className="w-5 h-5" />
@@ -151,9 +151,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
 
                 <button
                   type="submit"
-                  className="px-7 py-3 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-medium tracking-wider uppercase rounded-lg shadow-sm transition-colors flex items-center gap-2 cursor-pointer"
+                  className="btn-cta-emil px-8 py-3.5 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-semibold tracking-wider uppercase rounded-full shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.97]"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-3.5 h-3.5 text-[#F3E2C4]" />
                   <span>Enviar Consulta</span>
                 </button>
               </form>
