@@ -43,37 +43,51 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const tapTrackerRef = useRef<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 });
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const logoTapTrackerRef = useRef<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 });
+  const logoNavTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSecretTap = (e?: React.SyntheticEvent) => {
-    if (e) e.stopPropagation();
+  const handleLogoTap = (e: React.MouseEvent | React.TouchEvent) => {
     const now = Date.now();
-    if (now - tapTrackerRef.current.lastTime < 500) {
-      tapTrackerRef.current.count += 1;
+    // Allow up to 750ms between consecutive taps
+    if (now - logoTapTrackerRef.current.lastTime < 750) {
+      logoTapTrackerRef.current.count += 1;
     } else {
-      tapTrackerRef.current.count = 1;
+      logoTapTrackerRef.current.count = 1;
     }
-    tapTrackerRef.current.lastTime = now;
+    logoTapTrackerRef.current.lastTime = now;
 
-    if (tapTrackerRef.current.count >= 3) {
-      tapTrackerRef.current.count = 0;
+    // Trigger Admin Mode on 5 consecutive taps
+    if (logoTapTrackerRef.current.count >= 5) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (logoNavTimerRef.current) {
+        clearTimeout(logoNavTimerRef.current);
+        logoNavTimerRef.current = null;
+      }
+      logoTapTrackerRef.current.count = 0;
       setMobileMenuOpen(false);
-      onOpenAdmin();
-    }
-  };
 
-  const handleLongPressStart = () => {
-    longPressTimerRef.current = setTimeout(() => {
-      setMobileMenuOpen(false);
-      onOpenAdmin();
-    }, 2000);
-  };
+      // Haptic feedback on mobile if supported
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try {
+          navigator.vibrate([60, 50, 60]);
+        } catch {}
+      }
 
-  const handleLongPressEnd = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
+      onOpenAdmin();
+      return;
     }
+
+    // Debounce regular navigation so quick consecutive taps don't trigger page re-scroll
+    if (logoNavTimerRef.current) {
+      clearTimeout(logoNavTimerRef.current);
+    }
+    logoNavTimerRef.current = setTimeout(() => {
+      if (logoTapTrackerRef.current.count > 0 && logoTapTrackerRef.current.count < 5) {
+        handleNavClick('catalogo', 'all');
+      }
+      logoTapTrackerRef.current.count = 0;
+    }, 450);
   };
 
   const cleanPhone = (settings.whatsapp_number || '+50764324750').replace(/[^0-9]/g, '');
@@ -147,27 +161,23 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Brand Logo */}
           <div className="flex-1 lg:flex-none text-center lg:text-left">
             <button
-              onClick={() => handleNavClick('catalogo', 'all')}
-              className="inline-flex items-center gap-2.5 group focus:outline-none text-left cursor-pointer"
+              type="button"
+              onClick={handleLogoTap}
+              className="inline-flex items-center gap-2.5 group focus:outline-none text-left cursor-pointer select-none"
+              aria-label="Ir al catálogo de la tienda"
             >
               {settings.logo_url ? (
                 <div className="flex items-center gap-2.5">
                   <img
                     src={settings.logo_url}
                     alt={settings.store_name || 'Ballonsdei'}
-                    className="h-10 sm:h-12 w-auto max-w-[150px] object-contain rounded-md"
+                    className="h-10 sm:h-12 w-auto max-w-[150px] object-contain rounded-md pointer-events-none"
                   />
                   <div className="hidden sm:flex flex-col">
                     <span className="font-serif text-xl sm:text-2xl tracking-[0.14em] font-medium text-stone-900 group-hover:text-[#763D8B] transition-colors uppercase">
                       {settings.store_name || 'Ballonsdei'}
                     </span>
-                    <span
-                      onClick={handleSecretTap}
-                      onTouchStart={handleLongPressStart}
-                      onTouchEnd={handleLongPressEnd}
-                      onTouchCancel={handleLongPressEnd}
-                      className="text-[9px] tracking-[0.25em] text-stone-500 uppercase font-light select-none"
-                    >
+                    <span className="text-[9px] tracking-[0.25em] text-stone-500 uppercase font-light">
                       Boutique & Eventos
                     </span>
                   </div>
@@ -177,13 +187,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <span className="font-serif text-2xl sm:text-3xl tracking-[0.18em] font-medium text-stone-900 group-hover:text-[#763D8B] transition-colors uppercase">
                     {settings.store_name || 'Ballonsdei'}
                   </span>
-                  <span
-                    onClick={handleSecretTap}
-                    onTouchStart={handleLongPressStart}
-                    onTouchEnd={handleLongPressEnd}
-                    onTouchCancel={handleLongPressEnd}
-                    className="text-[9px] tracking-[0.3em] text-stone-500 uppercase font-light -mt-0.5 select-none"
-                  >
+                  <span className="text-[9px] tracking-[0.3em] text-stone-500 uppercase font-light -mt-0.5">
                     Boutique & Globos
                   </span>
                 </div>
@@ -272,10 +276,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col p-6 overflow-y-auto">
             <div className="flex items-center justify-between pb-5 border-b border-stone-200">
               <div
-                onClick={handleSecretTap}
-                onTouchStart={handleLongPressStart}
-                onTouchEnd={handleLongPressEnd}
-                onTouchCancel={handleLongPressEnd}
+                onClick={handleLogoTap}
                 className="select-none cursor-pointer active:opacity-75 transition-opacity"
               >
                 <span className="font-serif text-xl tracking-[0.15em] font-medium text-stone-900 block">

@@ -11,7 +11,8 @@ import {
   Truck,
   Heart,
   ZoomIn,
-  Sparkles
+  Sparkles,
+  SlidersHorizontal
 } from 'lucide-react';
 import { Product } from '../types/database';
 import { useCart } from '../context/CartContext';
@@ -64,11 +65,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const isFixedGift = product.gift_type === 'fixed';
   const isRental = product.available_for_rental;
 
-  const customTotal = isVariableGift
-    ? product.price + (customGiftState.plushPrice || 0) + customGiftState.extras.reduce((s, e) => s + e.price, 0)
-    : product.price;
+  // Allows customer to customize any gift (fixed or variable) if they wish!
+  const [isCustomizing, setIsCustomizing] = useState<boolean>(isVariableGift);
 
-  const unitPrice = isVariableGift 
+  const customTotal =
+    product.price + (customGiftState.plushPrice || 0) + customGiftState.extras.reduce((s, e) => s + e.price, 0);
+
+  const unitPrice = isCustomizing 
     ? customTotal 
     : isRental && product.rental_price 
     ? product.rental_price 
@@ -103,8 +106,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
       rentalEndDate,
       variant: selectedVariant,
       dedication: dedicationMessage,
-      customization: isVariableGift ? customGiftState : undefined,
-      customPrice: isVariableGift ? customTotal : undefined,
+      customization: isCustomizing ? customGiftState : undefined,
+      customPrice: isCustomizing ? customTotal : undefined,
     });
     onClose();
   };
@@ -121,7 +124,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in">
       <div 
-        className="relative w-full max-w-5xl bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-5xl bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col max-h-[92vh] animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
@@ -129,7 +132,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           <div className="flex items-center gap-2 text-xs text-[#8A796F] font-light">
             <span className="uppercase tracking-widest text-[#763D8B] font-medium">BALLONSDEI</span>
             <span>/</span>
-            <span>{isRental ? 'Alquiler para Eventos' : isVariableGift ? 'Regalo Personalizable' : 'Catálogo'}</span>
+            <span>{isRental ? 'Alquiler para Eventos' : isCustomizing ? 'Regalo Personalizable' : 'Diseño de Colección'}</span>
             <span>/</span>
             <span className="truncate max-w-[200px] text-[#423530]">{product.name}</span>
           </div>
@@ -139,22 +142,62 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               onClick={handleShare}
               className="p-2 text-[#7A6B63] hover:text-[#763D8B] hover:bg-[#F2ECE6] rounded-full transition-colors cursor-pointer"
               title="Copiar enlace"
+              aria-label="Compartir enlace de producto"
             >
               {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
             </button>
             <button
               onClick={onClose}
               className="p-2 text-[#7A6B63] hover:text-[#2E2421] hover:bg-[#F2ECE6] rounded-full transition-colors cursor-pointer"
-              aria-label="Cerrar modal"
+              aria-label="Cerrar ventana de detalles"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
+        {/* Mode Switcher: Diseño Original vs Modificar a mi Gusto */}
+        {!isRental && (
+          <div className="px-4 sm:px-8 pt-3 pb-2 bg-white border-b border-[#F0E8E2]">
+            <div className="bg-[#FAF4F7] p-1 rounded-xl border border-[#E8DED7] flex items-center gap-1.5 max-w-md mx-auto shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setIsCustomizing(false)}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold chip-spring cursor-pointer flex items-center justify-center gap-2 ${
+                  !isCustomizing
+                    ? 'bg-white text-[#241A23] shadow-xs border border-[#EAE3DC]'
+                    : 'text-[#6E5A69] hover:text-[#241A23]'
+                }`}
+              >
+                <Gift className="w-3.5 h-3.5 text-[#763D8B]" />
+                <span>Diseño de Colección {isFixedGift ? '(Fijo)' : ''}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsCustomizing(true)}
+                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold chip-spring cursor-pointer flex items-center justify-center gap-2 ${
+                  isCustomizing
+                    ? 'bg-[#763D8B] text-white shadow-xs'
+                    : 'text-[#6E5A69] hover:text-[#763D8B]'
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#F3E2C4]" />
+                <span>Modificar a mi Gusto</span>
+              </button>
+            </div>
+            
+            <p className="text-[11px] text-[#6E5A69] text-center mt-1.5 font-light">
+              {!isCustomizing 
+                ? '🌸 Arreglo de autor listo para enviar tal como se ve en la foto. ¿Deseas cambiarle algo? Selecciona «Modificar a mi Gusto».'
+                : '🎨 Taller de Personalización Activo: Modifica el tipo de globo, la dedicatoria en vinilo, cintas y peluches a tu gusto en tiempo real.'}
+            </p>
+          </div>
+        )}
+
         {/* Modal Body */}
         <div className="overflow-y-auto flex-1 p-4 sm:p-6 lg:p-8">
-          {isVariableGift ? (
+          {isCustomizing ? (
             /* ========================================================================= */
             /* CUSTOMIZABLE GIFT WORKSHOP LAYOUT: TOP SIMULATOR + BOTTOM ASSEMBLY STUDIO */
             /* ========================================================================= */
@@ -265,7 +308,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                             setSelectedImageIndex(index);
                             setIsZoomed(false);
                           }}
-                          className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-[#EAE2DC] ${
+                          className={`chip-spring relative aspect-square rounded-xl overflow-hidden border-2 cursor-pointer bg-[#EAE2DC] ${
                             isActive
                               ? 'border-[#763D8B] ring-2 ring-[#763D8B]/30 scale-102 shadow-xs'
                               : 'border-transparent opacity-75 hover:opacity-100 hover:border-[#D5C2B8]'
@@ -363,7 +406,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       <button
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                         disabled={isOutOfStock}
-                        className="px-3 py-2.5 text-[#423530] hover:bg-[#F2ECE6] disabled:opacity-40 transition-colors cursor-pointer"
+                        className="btn-spring-action px-3 py-2.5 text-[#423530] hover:bg-[#F2ECE6] disabled:opacity-40 cursor-pointer"
                       >
                         -
                       </button>
@@ -373,7 +416,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       <button
                         onClick={() => setQuantity((q) => Math.min(product.stock || 99, q + 1))}
                         disabled={isOutOfStock || quantity >= product.stock}
-                        className="px-3 py-2.5 text-[#423530] hover:bg-[#F2ECE6] disabled:opacity-40 transition-colors cursor-pointer"
+                        className="btn-spring-action px-3 py-2.5 text-[#423530] hover:bg-[#F2ECE6] disabled:opacity-40 cursor-pointer"
                       >
                         +
                       </button>
@@ -383,7 +426,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     <button
                       onClick={handleAddToCart}
                       disabled={isOutOfStock}
-                      className="flex-1 sm:flex-initial py-3.5 px-8 bg-[#763D8B] hover:bg-[#602F72] disabled:bg-[#D5C2B8] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="btn-cta-emil flex-1 sm:flex-initial py-3.5 px-8 bg-[#763D8B] hover:bg-[#602F72] disabled:bg-[#D5C2B8] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Sparkles className="w-4 h-4 text-[#F6E3BA]" />
                       <span>Agregar con mi Personalización</span>
@@ -525,15 +568,28 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       )}
                     </div>
 
-                    {onOpenCustomizerStudio && !isRental && (
-                      <button
-                        type="button"
-                        onClick={() => onOpenCustomizerStudio(product)}
-                        className="px-3.5 py-1.5 bg-[#763D8B]/10 hover:bg-[#763D8B] text-[#763D8B] hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer border border-[#763D8B]/25 shadow-2xs"
-                      >
-                        <span>Personalizar en Lienzo</span>
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {!isRental && (
+                        <button
+                          type="button"
+                          onClick={() => setIsCustomizing(true)}
+                          className="px-4 py-2 bg-[#763D8B] hover:bg-[#602F72] text-white rounded-xl text-xs font-semibold transition-[background-color,transform] duration-150 cursor-pointer shadow-xs active:scale-[0.97] flex items-center gap-1.5"
+                        >
+                          <SlidersHorizontal className="w-3.5 h-3.5" />
+                          <span>Modificar a mi Gusto</span>
+                        </button>
+                      )}
+
+                      {onOpenCustomizerStudio && !isRental && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenCustomizerStudio(product)}
+                          className="px-3.5 py-2 bg-[#FAF4F7] hover:bg-[#F2E5EF] text-[#763D8B] rounded-xl text-xs font-semibold transition-[background-color,border-color,transform] duration-150 cursor-pointer border border-[#763D8B]/25 shadow-2xs active:scale-[0.97]"
+                        >
+                          <span>Lienzo 2D</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-[#EFE8E2]">
@@ -670,19 +726,19 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       setSelectedImageIndex(0);
                       setIsZoomed(false);
                     }}
-                    className="group cursor-pointer bg-white rounded-lg p-2.5 border border-[#EDE5DF] hover:shadow-md transition-all"
+                    className="group cursor-pointer bg-white rounded-lg p-2.5 border border-[#EDE5DF] hover:shadow-md hover:border-[#763D8B]/30 transition-[box-shadow,border-color,transform] duration-150 active:scale-[0.98]"
                   >
                     <div className="aspect-square rounded-md overflow-hidden bg-[#F5EFEB] mb-2">
                       <img
                         src={rel.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=400&q=80'}
                         alt={rel.name}
-                        className="w-full h-full object-cover group-hover:scale-106 transition-transform"
+                        className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300 ease-out"
                       />
                     </div>
-                    <h5 className="font-serif text-xs font-medium text-[#2E2421] line-clamp-1 group-hover:text-[#8D5844]">
+                    <h5 className="font-serif text-xs font-medium text-[#2E2421] line-clamp-1 group-hover:text-[#763D8B] transition-colors duration-150">
                       {rel.name}
                     </h5>
-                    <span className="text-xs font-semibold text-[#8D5844] mt-1 block">
+                    <span className="text-xs font-semibold text-[#763D8B] mt-1 block">
                       ${rel.price.toFixed(2)}
                     </span>
                   </div>

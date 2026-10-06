@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Gift, Calendar, SlidersHorizontal } from 'lucide-react';
+import { Eye, Gift, Calendar, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { Product } from '../types/database';
 import { useCart } from '../context/CartContext';
 
@@ -22,6 +22,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const isOutOfStock = product.stock <= 0 && !product.available_for_rental;
   const isRental = product.available_for_rental;
+  const isVariableGift = product.gift_type === 'variable';
+  const isFixedGift = product.gift_type === 'fixed';
   const displayPrice = isRental && product.rental_price ? product.rental_price : product.price;
 
   // Zero-Pill Discipline: Editorial status text instead of colored pill capsules
@@ -29,8 +31,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     if (isOutOfStock) return 'Pieza Agotada';
     if (product.is_new) return 'Nueva Creación';
     if (isRental) return 'Mobiliario VIP';
-    if (product.gift_type === 'variable') return 'Personalizable en 2D';
-    if (product.gift_type === 'fixed') return 'Diseño de Colección';
+    if (isVariableGift) return 'Personalizable a tu Gusto';
+    if (isFixedGift) return 'Diseño de Colección (Fijo)';
     return null;
   };
 
@@ -39,32 +41,34 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <article 
       onClick={() => onViewProduct(product)}
-      className="group flex flex-col bg-white border border-[#EAE3DC] rounded-2xl overflow-hidden cursor-pointer transition-[border-color,box-shadow,transform] duration-200 ease-out hover:border-[#C5A059]/60 hover:shadow-lg hover:shadow-[#241A23]/4"
+      className="group flex flex-col bg-white border border-[#EAE3DC] rounded-2xl overflow-hidden cursor-pointer transition-[transform,box-shadow,border-color] duration-240 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-[#C5A059]/60 hover:shadow-xl hover:shadow-[#241A23]/8 active:scale-[0.99] active:duration-75"
     >
       {/* Product Image Stage */}
       <div className="relative aspect-4/5 overflow-hidden bg-[#FAF6F2]">
         <img
           src={mainImage}
           alt={product.name}
-          className="w-full h-full object-cover object-center transform transition-transform duration-500 ease-out group-hover:scale-[1.025]"
+          className="w-full h-full object-cover object-center transform transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.035] will-change-transform"
           loading="lazy"
         />
 
-        {/* Zero-Pill Editorial Status Tag: Clean unboxed typography */}
+        {/* Zero-Pill Editorial Status Tag: Clean unboxed typography with WCAG AA contrast */}
         {editionLabel && (
           <div className="absolute top-3.5 left-3.5 pointer-events-none">
-            <span className={`text-[10px] font-semibold tracking-[0.2em] uppercase px-2.5 py-1 rounded-sm backdrop-blur-md ${
+            <span className={`text-[10px] font-semibold tracking-[0.16em] uppercase px-2.5 py-1 rounded-sm backdrop-blur-md transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
               isOutOfStock 
-                ? 'bg-stone-900/80 text-stone-300' 
-                : 'bg-white/90 text-[#7D5B28] border border-[#C5A059]/30'
+                ? 'bg-stone-900/85 text-stone-200' 
+                : isVariableGift
+                ? 'bg-[#763D8B]/95 text-white shadow-xs'
+                : 'bg-white/95 text-[#7D5B28] border border-[#C5A059]/40'
             }`}>
               {editionLabel}
             </span>
           </div>
         )}
 
-        {/* Desktop Quick Look affordance (accessible and gated to hover) */}
-        <div className="absolute bottom-3 right-3 hidden sm:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        {/* Desktop Quick Look affordance (accessible and gated to hover with spring slide-up) */}
+        <div className="absolute bottom-3 right-3 hidden sm:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-[opacity,transform] duration-220 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none">
           <span className="text-[10px] font-semibold tracking-wider uppercase bg-white/95 text-[#241A23] px-2.5 py-1.5 rounded-full shadow-sm border border-[#EAE3DC] flex items-center gap-1.5">
             <Eye className="w-3 h-3 text-[#763D8B]" />
             <span>Ver detalle</span>
@@ -75,18 +79,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Info Content: Pure Editorial Typography */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
-          {/* Metadata clean text with bullet separators (Zero-Pill Rule) */}
-          <div className="flex items-center gap-2 text-[10px] text-[#8A7383] uppercase tracking-[0.18em] mb-1.5 font-medium">
-            <span>{isRental ? 'Alquiler para eventos' : product.gift_type !== 'none' ? 'Regalo de autor' : 'Floristería'}</span>
+          {/* Metadata clean text with bullet separators (Zero-Pill Rule + WCAG AA contrast #6E5A69) */}
+          <div className="flex items-center gap-2 text-[10px] text-[#6E5A69] uppercase tracking-[0.18em] mb-1.5 font-medium">
+            <span>
+              {isRental 
+                ? 'Alquiler para eventos' 
+                : isVariableGift
+                ? 'Regalo Personalizable'
+                : isFixedGift
+                ? 'Regalo Fijo'
+                : 'Floristería'}
+            </span>
             {product.size && (
               <>
-                <span className="text-[#C5A059]" aria-hidden="true">·</span>
+                <span className="text-[#7D5B28]" aria-hidden="true">·</span>
                 <span>{product.size}</span>
               </>
             )}
           </div>
 
-          <h3 className="font-serif text-base sm:text-lg text-[#241A23] font-normal leading-snug line-clamp-2 group-hover:text-[#763D8B] transition-colors duration-150">
+          <h3 className="font-serif text-base sm:text-lg text-[#241A23] font-normal leading-snug line-clamp-2 group-hover:text-[#763D8B] transition-colors duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]">
             {product.name}
           </h3>
         </div>
@@ -98,26 +110,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               ${displayPrice.toFixed(2)}
             </span>
             {isRental && (
-              <span className="text-[10px] text-[#7A6B63] font-light uppercase tracking-wider">/ día</span>
+              <span className="text-[10px] text-[#6E5A69] font-light uppercase tracking-wider">/ día</span>
             )}
             {product.previous_price && (
-              <span className="text-xs text-[#A89890] line-through font-light ml-1">
+              <span className="text-xs text-[#8A796F] line-through font-light ml-1">
                 ${product.previous_price.toFixed(2)}
               </span>
             )}
           </div>
 
-          {/* Emil Kowalski Tactile Action Trigger */}
+          {/* Emil Kowalski Tactile Action Triggers */}
           <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+            {/* Customization Action: available for variable gifts AND as an option to modify fixed gifts */}
             {onCustomizeProduct && !isRental && (
               <button
                 type="button"
                 onClick={() => onCustomizeProduct(product)}
-                className="btn-tactile text-[11px] font-semibold text-[#763D8B] hover:text-[#52255E] bg-[#763D8B]/8 hover:bg-[#763D8B]/15 px-3 py-1.5 rounded-full transition-colors duration-150 cursor-pointer flex items-center gap-1 active:scale-[0.97]"
-                title="Personalizar en lienzo 2D"
+                aria-label={isVariableGift ? `Personalizar ${product.name} en el estudio visual` : `Modificar ${product.name} a tu gusto`}
+                className={`btn-spring-action text-[11px] font-semibold px-2.5 sm:px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1 group/btn ${
+                  isVariableGift 
+                    ? 'text-white bg-[#763D8B] hover:bg-[#602F72] shadow-xs hover:shadow-md hover:shadow-[#763D8B]/25' 
+                    : 'text-[#763D8B] hover:text-[#52255E] bg-[#763D8B]/10 hover:bg-[#763D8B]/18 border border-[#763D8B]/25'
+                }`}
+                title={isVariableGift ? "Personalizar este regalo a tu gusto" : "Modificar este diseño a tu gusto (cambiar globos, frase o detalles)"}
               >
-                <SlidersHorizontal className="w-3 h-3 text-[#763D8B]" />
-                <span className="hidden xs:inline">Personalizar</span>
+                <SlidersHorizontal className="w-3 h-3 text-current transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:rotate-45" />
+                <span className="hidden xs:inline">{isVariableGift ? 'Personalizar' : 'Modificar'}</span>
               </button>
             )}
 
@@ -125,24 +143,26 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               <button
                 type="button"
                 onClick={() => onViewProduct(product)}
-                className="btn-tactile text-xs font-semibold text-[#435C4E] hover:text-[#2E4036] bg-[#435C4E]/10 hover:bg-[#435C4E]/18 px-3 py-1.5 rounded-full transition-colors duration-150 flex items-center gap-1 cursor-pointer active:scale-[0.97]"
+                aria-label={`Reservar ${product.name}`}
+                className="btn-spring-action text-xs font-semibold text-[#374D40] hover:text-[#1F2C24] bg-[#435C4E]/10 hover:bg-[#435C4E]/20 px-3.5 py-1.5 rounded-full flex items-center gap-1 cursor-pointer"
               >
                 <Calendar className="w-3 h-3" />
                 <span>Reservar</span>
               </button>
             ) : isOutOfStock ? (
               <span className="text-xs text-[#8C3A3A] font-medium tracking-wide">Agotado</span>
-            ) : (
+            ) : !isVariableGift ? (
               <button
                 type="button"
                 onClick={() => addItem(product, 1)}
-                className="btn-tactile text-xs font-semibold text-white bg-[#763D8B] hover:bg-[#602F72] px-3.5 py-1.5 rounded-full shadow-xs transition-colors duration-150 flex items-center gap-1.5 cursor-pointer active:scale-[0.97]"
-                title="Añadir al carrito"
+                aria-label={`Añadir ${product.name} tal cual al carrito`}
+                className="btn-spring-action text-xs font-semibold text-[#241A23] hover:text-[#763D8B] bg-[#FAF4F7] hover:bg-[#F2E5EF] border border-[#E4D7E0] hover:border-[#763D8B]/40 px-3 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-sm"
+                title="Añadir diseño fijo tal cual al carrito"
               >
-                <Gift className="w-3.5 h-3.5 text-[#F3E2C4]" />
+                <Gift className="w-3.5 h-3.5 text-[#763D8B]" />
                 <span>Añadir</span>
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

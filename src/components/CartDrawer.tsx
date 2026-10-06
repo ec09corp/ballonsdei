@@ -19,13 +19,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs transition-opacity duration-300">
       <div 
-        className="w-full max-w-md bg-[#FAF8F5] h-full shadow-2xl flex flex-col justify-between border-l border-[#EBE2DB] animate-slide-left"
+        className="w-full max-w-md bg-[#FAF8F5] h-full shadow-2xl flex flex-col justify-between border-l border-[#EBE2DB] animate-drawer-slide"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
         <div className="p-6 border-b border-[#EBE2DB] bg-white flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Gift className="w-5 h-5 text-[#8D5844]" />
+            <Gift className="w-5 h-5 text-[#763D8B]" />
             <h2 className="font-serif text-xl font-medium text-[#2E2421]">
               Tu Carrito ({itemCount})
             </h2>
@@ -52,7 +52,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </p>
               <button
                 onClick={closeCart}
-                className="mt-2 px-6 py-2.5 bg-[#8D5844] hover:bg-[#744533] text-white text-xs font-medium uppercase tracking-wider rounded-md transition-colors"
+                className="btn-tactile mt-2 px-6 py-2.5 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-medium uppercase tracking-wider rounded-full transition-colors active:scale-[0.97]"
               >
                 Comenzar a Comprar
               </button>
@@ -76,12 +76,25 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-serif text-sm font-medium text-[#2E2421] line-clamp-1">
-                        {item.product_name}
-                      </h4>
+                      <div>
+                        <h4 className="font-serif text-sm font-medium text-[#2E2421] line-clamp-1">
+                          {item.product_name}
+                        </h4>
+                        {/* Type indicator */}
+                        {item.customization ? (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#763D8B] bg-[#763D8B]/10 px-1.5 py-0.5 rounded-sm uppercase tracking-wider mt-0.5">
+                            🎨 Personalizado a tu Gusto
+                          </span>
+                        ) : !item.is_rental ? (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#7D5B28] bg-[#F5EFE6] px-1.5 py-0.5 rounded-sm uppercase tracking-wider mt-0.5 border border-[#D4AF37]/30">
+                            💎 Diseño Fijo Original
+                          </span>
+                        ) : null}
+                      </div>
+
                       <button
                         onClick={() => removeItem(item.product_id, item.selected_variant)}
-                        className="text-[#B3A298] hover:text-[#8C3A3A] transition-colors p-1"
+                        className="btn-spring-action text-[#B3A298] hover:text-[#8C3A3A] p-1 cursor-pointer"
                         title="Eliminar producto"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -133,7 +146,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         onClick={() =>
                           updateQuantity(item.product_id, item.quantity - 1, item.selected_variant)
                         }
-                        className="px-2 py-0.5 text-xs text-[#423530] hover:bg-[#EFE8E2]"
+                        className="btn-spring-action px-2 py-0.5 text-xs text-[#423530] hover:bg-[#EFE8E2] cursor-pointer"
                       >
                         -
                       </button>
@@ -144,7 +157,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         onClick={() =>
                           updateQuantity(item.product_id, item.quantity + 1, item.selected_variant)
                         }
-                        className="px-2 py-0.5 text-xs text-[#423530] hover:bg-[#EFE8E2]"
+                        className="btn-spring-action px-2 py-0.5 text-xs text-[#423530] hover:bg-[#EFE8E2] cursor-pointer"
                       >
                         +
                       </button>
@@ -170,7 +183,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </div>
               <div className="flex justify-between">
                 <span>Envío estimado:</span>
-                <span className="text-[#8D5844] font-medium">Calculado en checkout</span>
+                <span className="text-[#763D8B] font-medium">Calculado en checkout</span>
               </div>
               <div className="flex justify-between text-base font-semibold text-[#2E2421] pt-2 border-t border-[#EBE2DB]">
                 <span>Total Estimado:</span>
@@ -183,10 +196,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 closeCart();
                 onProceedToCheckout();
               }}
-              className="btn-cta-emil w-full py-3.5 bg-[#8D5844] hover:bg-[#744533] text-white text-xs sm:text-sm font-medium tracking-wider uppercase rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="btn-cta-emil w-full py-3.5 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs sm:text-sm font-semibold tracking-wider uppercase rounded-full shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.97]"
             >
               <span>Proceder al Checkout</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 text-[#F3E2C4]" />
             </button>
 
             <button

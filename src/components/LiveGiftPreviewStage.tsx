@@ -250,7 +250,7 @@ export const LiveGiftPreviewStage: React.FC<LiveGiftPreviewStageProps> = ({
 
               {/* Balloon Floating Envelope with keyframe physics */}
               <div 
-                className="relative flex flex-col items-center justify-center transition-all duration-300"
+                className="relative flex flex-col items-center justify-center transition-[transform,filter] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 style={{
                   animation: 'floatGameBalloon 3.6s ease-in-out infinite',
                 }}
@@ -269,7 +269,7 @@ export const LiveGiftPreviewStage: React.FC<LiveGiftPreviewStageProps> = ({
 
                 {/* 3D Balloon Body: Ultra-Realistic Gradients & Glass Specular Highlights */}
                 <div 
-                  className={`relative w-48 sm:w-60 h-40 sm:h-48 flex flex-col items-center justify-center p-4 text-center transition-all shadow-2xl backdrop-blur-[2px] border ${
+                  className={`relative w-48 sm:w-60 h-40 sm:h-48 flex flex-col items-center justify-center p-4 text-center transition-[border-color,background-color,box-shadow,transform,border-radius] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-2xl backdrop-blur-[2px] border ${
                     isHeart
                       ? 'rounded-[42%_42%_50%_50%] border-rose-200/90 bg-gradient-to-tr from-rose-600/70 via-rose-400/50 to-pink-300/60 shadow-[inset_0_0_25px_rgba(255,255,255,0.7),0_15px_35px_rgba(225,29,72,0.4)]'
                       : isStar

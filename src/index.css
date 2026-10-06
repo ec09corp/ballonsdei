@@ -8,9 +8,12 @@ html {
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
   
-  /* Emil Kowalski Signature Animation Curves & Durations */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Emil Kowalski Signature Animation Curves & Durations (Exponential Deceleration) */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring-snappy: cubic-bezier(0.2, 1, 0.3, 1);
+  --ease-spring-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-luxury: cubic-bezier(0.25, 1, 0.5, 1);
 }
@@ -106,13 +109,18 @@ button, [role="button"], a[class*="rounded"] {
   user-select: none;
 }
 
+/* Universal Accessible Focus Ring (WCAG AA Compliant) */
+:focus-visible {
+  outline: 2px solid #763D8B !important;
+  outline-offset: 2px !important;
+}
+
 /* Default button tactile physics:
    Instant sink on click/tap (75ms), spring rebound on release (160ms var(--ease-out)) */
 button:not(:disabled),
 [role="button"]:not([aria-disabled="true"]),
 .btn-tactile {
   transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out), opacity 160ms var(--ease-out);
-  will-change: transform;
 }
 
 /* Emil Kowalski active press: physical feedback that the UI registered the action */
@@ -150,7 +158,7 @@ button:not(:disabled):active,
 .btn-cta-emil {
   position: relative;
   overflow: hidden;
-  transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out), background-color 180ms var(--ease-out);
+  transition: transform 200ms var(--ease-spring), box-shadow 200ms var(--ease-spring), background-color 180ms var(--ease-out);
   will-change: transform, box-shadow;
 }
 @media (hover: hover) and (pointer: fine) {
@@ -161,8 +169,67 @@ button:not(:disabled):active,
 }
 .btn-cta-emil:active {
   transform: scale(0.97) translateY(0) !important;
-  transition-duration: 80ms !important;
+  transition-duration: 75ms !important;
   box-shadow: 0 2px 6px -1px rgba(118, 61, 139, 0.3) !important;
+}
+
+/* Emil Kowalski Card Tactile Physics */
+.card-tactile-emil {
+  transition: transform 220ms var(--ease-spring-smooth), box-shadow 220ms var(--ease-spring-smooth), border-color 180ms var(--ease-out);
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .card-tactile-emil:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* Option tactile spring button (Customizer selections) */
+.option-spring-emil,
+.customizer-spring-tile {
+  transition: transform 180ms var(--ease-spring), border-color 160ms var(--ease-out), background-color 160ms var(--ease-out), box-shadow 180ms var(--ease-spring);
+  will-change: transform, box-shadow;
+}
+@media (hover: hover) and (pointer: fine) {
+  .option-spring-emil:hover,
+  .customizer-spring-tile:hover {
+    transform: translateY(-2px);
+  }
+}
+.option-spring-emil:active,
+.customizer-spring-tile:active {
+  transform: scale(0.95) translateY(0) !important;
+  transition-duration: 75ms !important;
+}
+
+/* Dedicated spring button for product actions and modifier triggers */
+.btn-spring-action {
+  transition: transform 180ms var(--ease-spring), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), box-shadow 180ms var(--ease-spring), color 160ms var(--ease-out);
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn-spring-action:hover {
+    transform: translateY(-1.5px);
+  }
+}
+.btn-spring-action:active {
+  transform: scale(0.94) translateY(0) !important;
+  transition-duration: 70ms !important;
+}
+
+/* Spring chips for quick presets, tags, and swatches */
+.chip-spring {
+  transition: transform 170ms var(--ease-spring), background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out), box-shadow 170ms var(--ease-spring);
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  .chip-spring:hover {
+    transform: translateY(-1px) scale(1.03);
+  }
+}
+.chip-spring:active {
+  transform: scale(0.93) translateY(0) !important;
+  transition-duration: 70ms !important;
 }
 
 /* Subtle Shimmer Sheen on CTA Hover */

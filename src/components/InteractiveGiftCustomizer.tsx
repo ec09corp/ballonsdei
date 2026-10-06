@@ -153,14 +153,14 @@ export const InteractiveGiftCustomizer: React.FC<InteractiveGiftCustomizerProps>
                   soundEffects.playPop();
                   onChange({ ...customization, balloonType: balloon.label });
                 }}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-2.5 rounded-xl border text-left customizer-spring-tile cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'border-[#763D8B] bg-[#763D8B]/5 ring-2 ring-[#763D8B]/20 shadow-xs'
-                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50'
+                    ? 'border-[#763D8B] bg-[#763D8B]/8 ring-2 ring-[#763D8B]/25 shadow-sm scale-[1.015]'
+                    : 'border-stone-200 bg-white hover:border-[#763D8B]/40 hover:bg-[#FAF4F7]/40'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <div className={`p-1.5 rounded-lg ${isSelected ? 'bg-[#763D8B] text-white' : 'bg-stone-100 text-stone-600'}`}>
+                  <div className={`p-1.5 rounded-lg transition-colors duration-150 ${isSelected ? 'bg-[#763D8B] text-white' : 'bg-stone-100 text-stone-600'}`}>
                     <IconComponent className="w-3.5 h-3.5" />
                   </div>
                   {isSelected && <Check className="w-3.5 h-3.5 text-[#763D8B]" />}
@@ -215,7 +215,7 @@ export const InteractiveGiftCustomizer: React.FC<InteractiveGiftCustomizerProps>
                   soundEffects.playClick();
                   onChange({ ...customization, balloonText: msg });
                 }}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-white hover:bg-stone-200 text-stone-700 border border-stone-200 transition-colors cursor-pointer"
+                className="chip-spring text-[10px] px-2.5 py-1 rounded-full bg-white hover:bg-[#FAF4F7] text-stone-700 hover:text-[#763D8B] border border-stone-200 hover:border-[#763D8B]/30 cursor-pointer shadow-2xs"
               >
                 {msg}
               </button>
@@ -238,10 +238,10 @@ export const InteractiveGiftCustomizer: React.FC<InteractiveGiftCustomizerProps>
                       soundEffects.playClick();
                       onChange({ ...customization, vinylColor: vc.name });
                     }}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] transition-all cursor-pointer border ${
+                    className={`chip-spring inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] cursor-pointer border ${
                       isSelected
-                        ? 'border-[#763D8B] bg-white ring-2 ring-[#763D8B]/25 font-semibold text-stone-900 shadow-xs'
-                        : 'border-stone-200 bg-white hover:bg-stone-100 text-stone-600 font-normal'
+                        ? 'border-[#763D8B] bg-white ring-2 ring-[#763D8B]/30 font-semibold text-stone-900 shadow-sm scale-105'
+                        : 'border-stone-200 bg-white hover:bg-stone-50 text-stone-600 font-normal hover:border-stone-300'
                     }`}
                   >
                     <span
@@ -279,10 +279,10 @@ export const InteractiveGiftCustomizer: React.FC<InteractiveGiftCustomizerProps>
                   soundEffects.playClick();
                   onChange({ ...customization, colorPalette: pal.name });
                 }}
-                className={`p-2 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                className={`p-2 rounded-xl border text-left customizer-spring-tile cursor-pointer flex flex-col justify-between ${
                   isSelected
-                    ? 'border-[#763D8B] bg-[#763D8B]/5 ring-2 ring-[#763D8B]/20 shadow-xs'
-                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50'
+                    ? 'border-[#763D8B] bg-[#763D8B]/8 ring-2 ring-[#763D8B]/25 shadow-sm scale-[1.015]'
+                    : 'border-stone-200 bg-white hover:border-[#763D8B]/40 hover:bg-stone-50'
                 }`}
               >
                 <div className="flex items-center gap-1 mb-2">
@@ -325,10 +325,10 @@ export const InteractiveGiftCustomizer: React.FC<InteractiveGiftCustomizerProps>
                   soundEffects.playClick();
                   onChange({ ...customization, ribbonType: rib.label });
                 }}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`p-2.5 rounded-xl border text-left customizer-spring-tile cursor-pointer ${
                   isSelected
-                    ? 'border-[#763D8B] bg-[#763D8B]/5 ring-2 ring-[#763D8B]/20 shadow-xs'
-                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50'
+                    ? 'border-[#763D8B] bg-[#763D8B]/8 ring-2 ring-[#763D8B]/25 shadow-sm scale-[1.015]'
+                    : 'border-stone-200 bg-white hover:border-[#763D8B]/40 hover:bg-stone-50'
                 }`}
               >
                 <span className="text-xs font-medium text-stone-800 block">
@@ -369,10 +369,10 @@ export const InteractiveGiftCustomizer: React.FC<InteractiveGiftCustomizerProps>
                     plushPrice: opt.price,
                   });
                 }}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                className={`p-2.5 rounded-xl border text-left customizer-spring-tile cursor-pointer flex items-center justify-between ${
                   isSelected
-                    ? 'border-[#763D8B] bg-[#763D8B]/5 ring-2 ring-[#763D8B]/20 shadow-xs'
-                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50'
+                    ? 'border-[#763D8B] bg-[#763D8B]/8 ring-2 ring-[#763D8B]/25 shadow-sm scale-[1.015]'
+                    : 'border-stone-200 bg-white hover:border-[#763D8B]/40 hover:bg-stone-50'
                 }`}
               >
                 <div>
@@ -411,15 +411,15 @@ export const InteractiveGiftCustomizer: React.FC<InteractiveGiftCustomizerProps>
                 type="button"
                 key={ext.id}
                 onClick={() => toggleExtra({ name: ext.name, price: ext.price })}
-                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                className={`p-2.5 rounded-xl border text-left customizer-spring-tile cursor-pointer flex items-center justify-between ${
                   isChecked
-                    ? 'border-emerald-500 bg-emerald-50/60 ring-2 ring-emerald-500/20 shadow-xs'
-                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50'
+                    ? 'border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-500/25 shadow-sm scale-[1.015]'
+                    : 'border-stone-200 bg-white hover:border-emerald-400/40 hover:bg-stone-50'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className={`w-4 h-4 rounded border flex items-center justify-center ${
+                    className={`w-4 h-4 rounded border flex items-center justify-center transition-colors duration-150 ${
                       isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-stone-300 bg-white'
                     }`}
                   >

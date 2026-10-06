@@ -36,7 +36,7 @@ import { productionService } from './services/productionService';
 import { settingsService } from './services/settingsService';
 import { Product, Category, Order, ProductionItem, StoreSettings } from './types/database';
 import { INITIAL_SETTINGS } from './lib/mockData';
-import { Gift } from 'lucide-react';
+import { Gift, SlidersHorizontal, Sparkles } from 'lucide-react';
 
 function MainApp() {
   const { isAdmin } = useAuth();
@@ -159,6 +159,12 @@ function MainApp() {
   const displayProducts = products.filter((p) => {
     if (!p.active) return false;
     if (activeCategoryFilter === 'all') return true;
+    if (activeCategoryFilter === 'regalos-fijos') {
+      return p.gift_type === 'fixed';
+    }
+    if (activeCategoryFilter === 'personalizables' || activeCategoryFilter === 'regalos-variables') {
+      return p.gift_type === 'variable';
+    }
     return (
       p.category?.slug === activeCategoryFilter ||
       p.category_id === activeCategoryFilter ||
@@ -244,6 +250,14 @@ function MainApp() {
   // PUBLIC STOREFRONT VIEW
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#241A23] flex flex-col font-sans">
+      {/* Accessible Skip Link (A11y WCAG AA) */}
+      <a 
+        href="#catalogo" 
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2.5 focus:bg-white focus:text-[#763D8B] focus:font-semibold focus:shadow-xl focus:rounded-lg focus:border focus:border-[#763D8B]"
+      >
+        Saltar al catálogo de productos
+      </a>
+
       {/* Header with glassmorphism */}
       <Header
         settings={settings}
@@ -289,7 +303,7 @@ function MainApp() {
             <button
               type="button"
               onClick={() => setActiveCategoryFilter('all')}
-              className={`px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] ${
+              className={`chip-spring px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer ${
                 activeCategoryFilter === 'all'
                   ? 'bg-[#763D8B] text-white shadow-sm border border-[#763D8B]'
                   : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
@@ -297,8 +311,30 @@ function MainApp() {
             >
               Todos los Diseños
             </button>
+            <button
+              type="button"
+              onClick={() => setActiveCategoryFilter('personalizables')}
+              className={`chip-spring px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer flex items-center gap-1.5 ${
+                activeCategoryFilter === 'personalizables'
+                  ? 'bg-[#763D8B] text-white shadow-sm border border-[#763D8B]'
+                  : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
+              }`}
+            >
+              <span>🎨 Personalizables (A tu Gusto)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveCategoryFilter('regalos-fijos')}
+              className={`chip-spring px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer flex items-center gap-1.5 ${
+                activeCategoryFilter === 'regalos-fijos'
+                  ? 'bg-[#763D8B] text-white shadow-sm border border-[#763D8B]'
+                  : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
+              }`}
+            >
+              <span>💎 Diseños de Colección (Fijos)</span>
+            </button>
             {categories
-              .filter((c) => c.active)
+              .filter((c) => c.active && c.slug !== 'regalos-fijos' && c.slug !== 'personalizables')
               .map((cat) => {
                 const isCurrent = activeCategoryFilter === cat.slug;
                 return (
@@ -306,7 +342,7 @@ function MainApp() {
                     type="button"
                     key={cat.id}
                     onClick={() => setActiveCategoryFilter(cat.slug)}
-                    className={`px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.97] ${
+                    className={`chip-spring px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer ${
                       isCurrent
                         ? 'bg-[#763D8B] text-white shadow-sm border border-[#763D8B]'
                         : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
@@ -317,6 +353,40 @@ function MainApp() {
                 );
               })}
           </div>
+        </div>
+
+        {/* Dynamic Gift Customization Guidance Banner */}
+        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-white border border-[#EAE3DC] shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-10 h-10 rounded-full bg-[#763D8B]/10 flex items-center justify-center text-[#763D8B] shrink-0 mt-0.5 sm:mt-0">
+              <SlidersHorizontal className="w-5 h-5 text-[#763D8B]" />
+            </div>
+            <div>
+              <h3 className="font-serif text-base sm:text-lg text-[#241A23] font-normal">
+                {activeCategoryFilter === 'personalizables'
+                  ? 'Estudio de Regalos Personalizables'
+                  : activeCategoryFilter === 'regalos-fijos'
+                  ? 'Colección de Regalos Fijos'
+                  : '¿Cómo elegir tu Regalo Ideal?'}
+              </h3>
+              <p className="text-xs text-[#6E5A69] font-light max-w-2xl mt-0.5 leading-relaxed">
+                {activeCategoryFilter === 'personalizables'
+                  ? 'Tú tienes el control total: elige la base floral, el tipo de globo, la dedicatoria en vinilo, cintas y peluches con previsualización en vivo.'
+                  : activeCategoryFilter === 'regalos-fijos'
+                  ? 'Diseños icónicos listos para entregar tal como se ven en la foto. ¿Quieres cambiarle algo? Pulsa «Modificar» en cualquier arreglo para adaptarlo.'
+                  : 'Los Regalos Fijos vienen prediseñados y listos para enviar. Si deseas cambiar el tipo de globo, mensaje en vinilo o accesorios, puedes pulsar «Modificar» o «Personalizar» sobre cualquier producto.'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleOpenCustomizer()}
+            className="btn-spring-action text-xs font-semibold px-4 py-2.5 bg-[#FAF4F7] hover:bg-[#763D8B] text-[#763D8B] hover:text-white border border-[#763D8B]/30 rounded-full shrink-0 flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Lienzo 2D Interactivo</span>
+          </button>
         </div>
 
         {/* Product Grid */}

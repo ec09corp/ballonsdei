@@ -16,17 +16,21 @@ export const Footer: React.FC<FooterProps> = ({
   const tapTrackerRef = useRef<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 });
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleTap = () => {
+  const handleTap = (e?: React.SyntheticEvent) => {
+    if (e) e.stopPropagation();
     const now = Date.now();
-    if (now - tapTrackerRef.current.lastTime < 500) {
+    if (now - tapTrackerRef.current.lastTime < 750) {
       tapTrackerRef.current.count += 1;
     } else {
       tapTrackerRef.current.count = 1;
     }
     tapTrackerRef.current.lastTime = now;
 
-    if (tapTrackerRef.current.count >= 3) {
+    if (tapTrackerRef.current.count >= 5) {
       tapTrackerRef.current.count = 0;
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        try { navigator.vibrate([60, 50, 60]); } catch {}
+      }
       onOpenAdmin();
     }
   };
@@ -50,12 +54,19 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-[#30212E]">
           {/* Brand info */}
           <div className="lg:col-span-4 space-y-4">
-            <div className="flex items-center gap-3">
+            <div 
+              onClick={handleTap}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
+              className="flex items-center gap-3 cursor-pointer select-none"
+              title="Ballonsdei"
+            >
               {settings.logo_url && (
                 <img
                   src={settings.logo_url}
                   alt={settings.store_name || 'Ballonsdei'}
-                  className="h-10 sm:h-12 w-auto max-w-[140px] object-contain rounded-md"
+                  className="h-10 sm:h-12 w-auto max-w-[140px] object-contain rounded-md pointer-events-none"
                 />
               )}
               <div>

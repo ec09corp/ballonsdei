@@ -22,13 +22,13 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-medium tracking-[0.25em] text-[#8D5844] uppercase block mb-2">
+          <span className="text-xs font-semibold tracking-[0.25em] text-[#C5A059] uppercase block mb-2">
             Nuestras Colecciones
           </span>
-          <h2 className="font-serif text-3xl sm:text-4xl text-[#2B211D] font-normal tracking-tight">
+          <h2 className="font-serif text-3xl sm:text-4xl text-[#241A23] font-light tracking-tight">
             Explora por Categoría
           </h2>
-          <div className="w-12 h-0.5 bg-[#8D5844] mx-auto mt-4" />
+          <div className="w-12 h-0.5 bg-[#763D8B] mx-auto mt-4" />
         </div>
 
         {/* Categories Grid */}
@@ -39,10 +39,10 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
               <div
                 key={cat.id}
                 onClick={() => onSelectCategory(cat.slug)}
-                className={`group relative overflow-hidden rounded-xl cursor-pointer border transition-all duration-300 ${
+                className={`group relative overflow-hidden rounded-2xl cursor-pointer border transition-[border-color,box-shadow,transform] duration-220 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98] ${
                   isSelected
-                    ? 'border-[#8D5844] shadow-md ring-2 ring-[#8D5844]/20'
-                    : 'border-[#EAE1D9] hover:border-[#D5C2B8] shadow-xs hover:shadow-lg'
+                    ? 'border-[#763D8B] shadow-md ring-2 ring-[#763D8B]/20'
+                    : 'border-[#EAE1D9] hover:border-[#C5A059]/60 shadow-xs hover:shadow-lg'
                 }`}
               >
                 {/* Image */}
@@ -50,7 +50,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                   <img
                     src={cat.image_url || 'https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=800&q=80'}
                     alt={cat.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-500"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
@@ -69,7 +69,7 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                         </p>
                       )}
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center shrink-0 group-hover:bg-[#8D5844] transition-colors ml-2">
+                    <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-xs flex items-center justify-center shrink-0 group-hover:bg-[#763D8B] transition-colors ml-2">
                       <ArrowUpRight className="w-4 h-4 text-white" />
                     </div>
                   </div>

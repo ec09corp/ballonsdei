@@ -536,7 +536,7 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
                         type="button"
                         key={img.id || idx}
                         onClick={() => setSelectedPhotoIndex(idx)}
-                        className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
+                        className={`chip-spring w-12 h-12 rounded-lg overflow-hidden border-2 cursor-pointer ${
                           selectedPhotoIndex === idx
                             ? 'border-[#763D8B] scale-105 shadow-xs'
                             : 'border-transparent opacity-70 hover:opacity-100'
@@ -717,7 +717,7 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-3 rounded-xl border border-stone-300 text-stone-700 hover:bg-stone-50 font-semibold text-xs transition-colors cursor-pointer"
+              className="btn-spring-action px-5 py-3 rounded-xl border border-stone-300 text-stone-700 hover:bg-stone-50 font-semibold text-xs cursor-pointer"
             >
               Cancelar
             </button>

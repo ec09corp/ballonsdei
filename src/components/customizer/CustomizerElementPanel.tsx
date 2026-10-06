@@ -132,7 +132,7 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
                 soundEffects.playClick();
                 setActiveCategory(tab.id);
               }}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              className={`chip-spring px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 isActive
                   ? 'bg-[#763D8B] text-white shadow-xs'
                   : 'bg-white text-stone-700 hover:bg-[#F2ECE6] border border-[#E3D7CE]'
@@ -156,7 +156,7 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
             <button
               type="button"
               onClick={onDeleteSelected}
-              className="text-[11px] text-rose-600 hover:text-rose-800 font-semibold flex items-center gap-1 cursor-pointer"
+              className="btn-spring-action text-[11px] text-rose-600 hover:text-rose-800 font-semibold flex items-center gap-1 cursor-pointer"
             >
               <Trash2 className="w-3 h-3" />
               <span>Quitar</span>
@@ -186,10 +186,10 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
                         onUpdateSelectedText(selectedText.text, col.hex, selectedText.fontFamily, selectedText.fontSize);
                       }
                     }}
-                    className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer relative shadow-2xs ${
+                    className={`chip-spring w-6 h-6 rounded-full border-2 cursor-pointer relative shadow-2xs ${
                       isCurrentColor 
                         ? 'border-[#763D8B] scale-115 ring-2 ring-[#763D8B]/30' 
-                        : 'border-white hover:scale-105'
+                        : 'border-white hover:scale-110'
                     }`}
                     style={{ backgroundColor: col.hex }}
                     title={col.name}
@@ -285,10 +285,10 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
                       soundEffects.playClick();
                       setTextColor(c.hex);
                     }}
-                    className={`w-7 h-7 rounded-full border-2 transition-all cursor-pointer relative shadow-2xs ${
+                    className={`chip-spring w-7 h-7 rounded-full border-2 cursor-pointer relative shadow-2xs ${
                       textColor === c.hex 
                         ? 'border-[#763D8B] scale-110 ring-2 ring-[#763D8B]/30' 
-                        : 'border-white'
+                        : 'border-white hover:scale-105'
                     }`}
                     style={{ backgroundColor: c.hex }}
                     title={c.name}
@@ -322,7 +322,7 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
               type="button"
               onClick={handleCreateText}
               disabled={!textInput.trim()}
-              className="w-full py-2.5 px-4 bg-[#763D8B] hover:bg-[#602F72] disabled:opacity-40 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="btn-cta-emil w-full py-2.5 px-4 bg-[#763D8B] hover:bg-[#602F72] disabled:opacity-40 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Colocar Texto en el Lienzo</span>
@@ -360,10 +360,10 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
                       soundEffects.playPop();
                       onAddElement(elem);
                     }}
-                    className="group p-2.5 rounded-xl border border-stone-200 hover:border-[#763D8B] bg-white hover:bg-[#FAF6F0] transition-all cursor-pointer flex flex-col items-center text-center shadow-2xs hover:shadow-xs relative"
+                    className="group p-2.5 rounded-xl border border-stone-200 hover:border-[#763D8B] bg-white hover:bg-[#FAF6F0] customizer-spring-tile cursor-pointer flex flex-col items-center text-center shadow-2xs hover:shadow-xs relative"
                   >
                     {/* Cartoon Illustration Thumbnail with transparent background effect */}
-                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#FAF6F0] border border-[#EADBCE] flex items-center justify-center p-1.5 mb-1.5 group-hover:scale-108 transition-transform shadow-2xs">
+                    <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#FAF6F0] border border-[#EADBCE] flex items-center justify-center p-1.5 mb-1.5 group-hover:scale-110 transition-transform duration-220 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-2xs">
                       {elem.image_url.startsWith('data:image/svg+xml') || !elem.image_url.startsWith('http') ? (
                         <CartoonIllustration
                           type={elem.name}
@@ -381,7 +381,7 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
                     </div>
 
                     {/* Name */}
-                    <span className="text-[11px] font-semibold text-stone-800 line-clamp-1 group-hover:text-[#763D8B]">
+                    <span className="text-[11px] font-semibold text-stone-800 line-clamp-1 group-hover:text-[#763D8B] transition-colors duration-150">
                       {elem.name}
                     </span>
 
@@ -391,7 +391,7 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
                     </span>
 
                     {/* Quick Add Pill */}
-                    <span className="mt-1 text-[9px] px-2 py-0.5 rounded-full bg-[#763D8B]/10 text-[#763D8B] font-bold group-hover:bg-[#763D8B] group-hover:text-white transition-colors flex items-center gap-0.5">
+                    <span className="mt-1 text-[9px] px-2 py-0.5 rounded-full bg-[#763D8B]/10 text-[#763D8B] font-bold group-hover:bg-[#763D8B] group-hover:text-white transition-colors duration-150 flex items-center gap-0.5">
                       <Plus className="w-2.5 h-2.5" />
                       <span>Agregar</span>
                     </span>

@@ -35,10 +35,10 @@ export const InstagramSection: React.FC<InstagramSectionProps> = ({ settings }) 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-10 gap-4 text-center sm:text-left">
           <div>
-            <span className="text-xs font-medium tracking-[0.25em] text-[#8D5844] uppercase block mb-1">
+            <span className="text-xs font-semibold tracking-[0.25em] text-[#C5A059] uppercase block mb-1">
               Comunidad & Momentos
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl text-[#2B211D] font-normal">
+            <h2 className="font-serif text-2xl sm:text-3xl text-[#241A23] font-light">
               Síguenos en Instagram
             </h2>
           </div>
@@ -47,11 +47,11 @@ export const InstagramSection: React.FC<InstagramSectionProps> = ({ settings }) 
             href={settings.instagram_url || 'https://instagram.com/ballonsdei_placeholder'}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#FAF8F5] hover:bg-[#F2ECE6] text-[#382B26] border border-[#D5C2B8] rounded-full text-xs font-medium tracking-wider uppercase transition-colors"
+            className="btn-tactile inline-flex items-center gap-2 px-6 py-3 bg-[#FAF8F5] hover:bg-[#FAF4F7] text-[#241A23] border border-[#D5C2B8] hover:border-[#763D8B]/40 rounded-full text-xs font-semibold tracking-wider uppercase transition-colors active:scale-[0.97]"
           >
-            <Instagram className="w-4 h-4 text-[#8D5844]" />
+            <Instagram className="w-4 h-4 text-[#763D8B]" />
             <span>@ballonsdei</span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-[#8A796F]" />
+            <ArrowUpRight className="w-3.5 h-3.5 text-[#C5A059]" />
           </a>
         </div>
 
