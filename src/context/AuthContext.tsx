@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, checkIsSupabaseConfigured } from '../lib/supabase';
 import { Profile } from '../types/database';
 
 interface AuthContextType {
@@ -266,7 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signInAsOwner,
         signOut,
-        isSupabaseConnected: isSupabaseConfigured,
+        isSupabaseConnected: checkIsSupabaseConfigured(),
       }}
     >
       {children}

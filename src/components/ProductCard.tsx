@@ -67,6 +67,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
+        {/* Ballonsdei Atelier Signature Corner Seal */}
+        <div className="absolute top-2.5 right-2.5 pointer-events-none z-10">
+          <span className="text-[7.5px] sm:text-[8px] font-bold tracking-[0.2em] text-[#F0DCB0] bg-[#1F0E23]/80 backdrop-blur-xs px-1.5 py-0.5 rounded-xs uppercase shadow-2xs border border-[#C5A059]/30">
+            BALLONSDEI
+          </span>
+        </div>
+
         {/* Desktop Quick Look affordance (accessible and gated to hover with spring slide-up) */}
         <div className="absolute bottom-3 right-3 hidden sm:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-[opacity,transform] duration-220 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none">
           <span className="text-[10px] font-semibold tracking-wider uppercase bg-white/95 text-[#241A23] px-2.5 py-1.5 rounded-full shadow-sm border border-[#EAE3DC] flex items-center gap-1.5">
@@ -77,17 +84,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Info Content: Pure Editorial Typography */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+      <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
           {/* Metadata clean text with bullet separators (Zero-Pill Rule + WCAG AA contrast #6E5A69) */}
-          <div className="flex items-center gap-2 text-[10px] text-[#6E5A69] uppercase tracking-[0.18em] mb-1.5 font-medium">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] text-[#6E5A69] uppercase tracking-[0.16em] mb-1 font-medium truncate">
             <span>
               {isRental 
-                ? 'Alquiler para eventos' 
+                ? 'Alquiler Eventos' 
                 : isVariableGift
-                ? 'Regalo Personalizable'
+                ? 'Personalizable'
                 : isFixedGift
-                ? 'Regalo Fijo'
+                ? 'Colección'
                 : 'Floristería'}
             </span>
             {product.size && (
@@ -98,51 +105,51 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             )}
           </div>
 
-          <h3 className="font-serif text-base sm:text-lg text-[#241A23] font-normal leading-snug line-clamp-2 group-hover:text-[#763D8B] transition-colors duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]">
+          <h3 className="font-serif text-sm sm:text-lg text-[#241A23] font-normal leading-snug line-clamp-2 group-hover:text-[#763D8B] transition-colors duration-160 ease-[cubic-bezier(0.23,1,0.32,1)]">
             {product.name}
           </h3>
         </div>
 
         {/* Price & Action Strip */}
-        <div className="mt-3.5 pt-3 border-t border-[#F2ECE6] flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-baseline gap-1.5 min-w-0">
-            <span className="font-serif text-xl sm:text-2xl font-light text-[#241A23] truncate">
+        <div className="mt-2.5 sm:mt-3.5 pt-2.5 sm:pt-3 border-t border-[#F2ECE6] flex items-center justify-between gap-1.5">
+          <div className="flex items-baseline gap-1 min-w-0">
+            <span className="font-serif text-lg sm:text-2xl font-light text-[#241A23] truncate">
               ${displayPrice.toFixed(2)}
             </span>
             {isRental && (
-              <span className="text-[10px] text-[#6E5A69] font-light uppercase tracking-wider shrink-0">/ día</span>
+              <span className="text-[9px] sm:text-[10px] text-[#6E5A69] font-light uppercase tracking-wider shrink-0">/ día</span>
             )}
             {product.previous_price && (
-              <span className="text-xs text-[#8A796F] line-through font-light ml-0.5 shrink-0">
+              <span className="text-[10px] sm:text-xs text-[#8A796F] line-through font-light ml-0.5 shrink-0">
                 ${product.previous_price.toFixed(2)}
               </span>
             )}
           </div>
 
           {/* Action Triggers */}
-          <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
             {isRental ? (
               <button
                 type="button"
                 onClick={() => onViewProduct(product)}
                 aria-label={`Reservar ${product.name}`}
-                className="btn-spring-action text-xs font-semibold text-[#374D40] hover:text-[#1F2C24] bg-[#435C4E]/10 hover:bg-[#435C4E]/20 px-3 py-1.5 rounded-full flex items-center gap-1 cursor-pointer shrink-0"
+                className="btn-spring-action text-[11px] sm:text-xs font-semibold text-[#374D40] hover:text-[#1F2C24] bg-[#435C4E]/10 hover:bg-[#435C4E]/20 px-2.5 sm:px-3 py-1.5 rounded-full flex items-center gap-1 cursor-pointer shrink-0"
               >
-                <Calendar className="w-3 h-3" />
-                <span>Reservar</span>
+                <Calendar className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reservar</span>
               </button>
             ) : isOutOfStock ? (
-              <span className="text-xs text-[#8C3A3A] font-medium tracking-wide shrink-0">Agotado</span>
+              <span className="text-[10px] sm:text-xs text-[#8C3A3A] font-medium tracking-wide shrink-0">Agotado</span>
             ) : (
               <button
                 type="button"
                 onClick={() => addItem(product, 1)}
                 aria-label={`Añadir ${product.name} al carrito`}
-                className="btn-spring-action text-xs font-semibold text-white bg-[#763D8B] hover:bg-[#602F72] shadow-xs hover:shadow-md hover:shadow-[#763D8B]/20 px-3 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shrink-0"
-                title="Añadir producto al carrito de compras"
+                className="btn-spring-action text-[11px] sm:text-xs font-semibold text-white bg-[#763D8B] hover:bg-[#602F72] shadow-xs hover:shadow-md hover:shadow-[#763D8B]/20 p-2 sm:px-3 sm:py-1.5 rounded-full flex items-center gap-1 cursor-pointer shrink-0"
+                title="Añadir producto al carrito"
               >
                 <ShoppingCart className="w-3.5 h-3.5 text-white" />
-                <span>Añadir</span>
+                <span className="hidden sm:inline">Añadir</span>
               </button>
             )}
           </div>

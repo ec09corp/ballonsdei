@@ -28,6 +28,7 @@ import { AdminSettings } from './components/admin/AdminSettings';
 import { AdminCustomizerElements } from './components/admin/AdminCustomizerElements';
 import { AdminExtras } from './components/admin/AdminExtras';
 import { ArrangementCustomizerModal } from './components/customizer/ArrangementCustomizerModal';
+import { MobileBallonsdeiAtmosphere } from './components/MobileBallonsdeiAtmosphere';
 
 // Services & Data
 import { productService } from './services/productService';
@@ -253,7 +254,7 @@ function MainApp() {
 
   // PUBLIC STOREFRONT VIEW
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-[#241A23] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#241A23] flex flex-col font-sans pb-16 sm:pb-0">
       {/* Accessible Skip Link (A11y WCAG AA) */}
       <a 
         href="#catalogo" 
@@ -261,6 +262,14 @@ function MainApp() {
       >
         Saltar al catálogo de productos
       </a>
+
+      {/* Ambient Mobile Balloons, Ballonsdei Watermarks & Bottom Action Bar */}
+      <MobileBallonsdeiAtmosphere
+        settings={settings}
+        onOpenCustomizer={() => handleOpenCustomizer()}
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onNavigateToCatalog={() => handleNavigate('catalogo', 'all')}
+      />
 
       {/* Header with glassmorphism */}
       <Header
@@ -284,15 +293,15 @@ function MainApp() {
       <LuxuryMarquee />
 
       {/* Main Catalog - Haute Floristerie Showcase */}
-      <main id="catalogo" className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-10 sm:py-16">
+      <main id="catalogo" className="flex-1 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 w-full py-8 sm:py-16">
         {/* Rolex-Style Category Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-6 border-b border-[#EAE3DC]">
-          <div className="space-y-2">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 sm:gap-6 mb-8 sm:mb-10 pb-5 sm:pb-6 border-b border-[#EAE3DC]">
+          <div className="space-y-1.5 sm:space-y-2">
             <div className="inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-bold tracking-[0.22em] text-[#C5A059] uppercase">
               <span>✦</span>
               <span>COLLECTIONS PRIVÉES</span>
             </div>
-            <h2 className="font-serif text-3xl sm:text-4xl text-[#241A23] font-light tracking-tight">
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#241A23] font-light tracking-tight">
               {activeCategoryFilter === 'all'
                 ? 'Catálogo General de Autor'
                 : categories.find((c) => c.slug === activeCategoryFilter)?.name || 'Catálogo'}
@@ -302,8 +311,8 @@ function MainApp() {
             </p>
           </div>
 
-          {/* Category Tabs with Gold Accent Indicators */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+          {/* Category Tabs with Gold Accent Indicators & Smooth Mobile Scroll */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0 no-scrollbar text-xs">
             <button
               type="button"
               onClick={() => setActiveCategoryFilter('all')}
@@ -313,7 +322,7 @@ function MainApp() {
                   : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
               }`}
             >
-              Todos los Diseños
+              🌸 Todos los Diseños
             </button>
             <button
               type="button"
@@ -348,7 +357,7 @@ function MainApp() {
           </div>
         </div>
 
-        {/* Product Grid */}
+        {/* Product Grid - Mobile Optimized Gaps */}
         {isLoading ? (
           <div className="py-24 text-center text-stone-500 text-sm font-light space-y-3">
             <div className="w-8 h-8 mx-auto border-2 border-[#763D8B] border-t-transparent rounded-full animate-spin" />
@@ -375,7 +384,7 @@ function MainApp() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {displayProducts.map((prod) => (
               <ProductCard
                 key={prod.id}

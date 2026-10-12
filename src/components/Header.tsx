@@ -137,18 +137,20 @@ export const Header: React.FC<HeaderProps> = ({
         : 'bg-white/98 backdrop-blur-md border-b border-stone-200 shadow-2xs'
     }`}>
       {/* Top Announcement Bar */}
-      <div className="bg-[#1F0E23] text-[#F3EBF0] text-xs py-2 px-4 border-b border-[#C5A059]/20">
+      <div className="bg-[#1F0E23] text-[#F3EBF0] text-xs py-1.5 sm:py-2 px-3 sm:px-4 border-b border-[#C5A059]/20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="text-[11px] sm:text-xs font-light text-stone-300 mx-auto sm:mx-0 flex items-center gap-2">
+          <div className="text-[10px] sm:text-xs font-light text-stone-300 mx-auto sm:mx-0 flex items-center gap-1.5 sm:gap-2 truncate">
             <span className="text-[#C5A059]">✦</span>
-            <span className="font-semibold text-white tracking-wider">BALLONSDEI</span>
+            <span className="font-bold text-white tracking-wider">BALLONSDEI</span>
             <span className="text-[#C5A059]">·</span>
-            <span>Obsequios Personalizados & Arreglos Florales · Colón · VIP: </span>
+            <span className="hidden sm:inline">Obsequios Personalizados & Arreglos Florales · Colón · </span>
+            <span className="sm:hidden">Colón · </span>
+            <span>VIP WhatsApp: </span>
             <a
               href={`https://wa.me/${cleanPhone}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#E5CA92] hover:text-white font-medium transition-colors"
+              className="text-[#E5CA92] hover:text-white font-semibold transition-colors"
             >
               {settings.whatsapp_number || '+507 6432-4750'}
             </a>

@@ -327,13 +327,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto animate-fade-in">
       <div 
-        className="relative w-full max-w-2xl bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col max-h-[92vh] animate-modal-enter"
+        className="relative w-full max-w-2xl bg-[#FAF8F5] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden my-0 sm:my-auto border-t sm:border border-[#E8DED7] flex flex-col max-h-[94vh] sm:max-h-[92vh] animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 sm:p-6 border-b border-[#EBE2DB] bg-white flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-[#EBE2DB] bg-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <ShoppingCart className="w-5 h-5 text-[#763D8B]" />
             <div>
@@ -354,7 +354,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-5 sm:p-8 space-y-6 flex-1">
+        <div className="overflow-y-auto p-4 sm:p-8 space-y-5 sm:space-y-6 flex-1">
           {completedOrder ? (
             /* DETAILED BOUTIQUE ORDER RECEIPT VIEW */
             <div className="space-y-6 animate-fade-in">
@@ -842,43 +842,43 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-[#6B5A52]">
                   4. Método de Pago (Yappy, Transferencia Bancaria o Tarjeta)
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('Yappy')}
-                    className={`p-3 rounded-xl border text-xs font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    className={`p-2.5 sm:p-3 rounded-xl border text-[11px] sm:text-xs font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
                       paymentMethod === 'Yappy'
                         ? 'border-[#763D8B] bg-[#763D8B] text-white shadow-xs'
                         : 'border-[#D5C2B8] bg-white text-[#423530] hover:bg-[#F2ECE6]'
                     }`}
                   >
-                    <Smartphone className="w-4 h-4" />
+                    <Smartphone className="w-3.5 h-3.5 shrink-0" />
                     <span>Yappy</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('Transferencia')}
-                    className={`p-3 rounded-xl border text-xs font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    className={`p-2.5 sm:p-3 rounded-xl border text-[11px] sm:text-xs font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
                       paymentMethod === 'Transferencia'
                         ? 'border-[#763D8B] bg-[#763D8B] text-white shadow-xs'
                         : 'border-[#D5C2B8] bg-white text-[#423530] hover:bg-[#F2ECE6]'
                     }`}
                   >
-                    <Landmark className="w-4 h-4" />
-                    <span>Transferencia ACH</span>
+                    <Landmark className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">ACH Banco</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod('Tarjeta')}
-                    className={`p-3 rounded-xl border text-xs font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    className={`p-2.5 sm:p-3 rounded-xl border text-[11px] sm:text-xs font-semibold text-center transition-all cursor-pointer flex items-center justify-center gap-1.5 sm:gap-2 ${
                       paymentMethod === 'Tarjeta'
                         ? 'border-[#763D8B] bg-[#763D8B] text-white shadow-xs'
                         : 'border-[#D5C2B8] bg-white text-[#423530] hover:bg-[#F2ECE6]'
                     }`}
                   >
-                    <CreditCard className="w-4 h-4" />
+                    <CreditCard className="w-3.5 h-3.5 shrink-0" />
                     <span>Tarjeta</span>
                   </button>
                 </div>

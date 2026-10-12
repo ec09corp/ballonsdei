@@ -11,7 +11,12 @@ import {
   CheckCircle2,
   RefreshCw,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Cloud,
+  Globe,
+  Key,
+  Terminal,
+  HelpCircle
 } from 'lucide-react';
 import { StoreSettings } from '../../types/database';
 import { settingsService } from '../../services/settingsService';
@@ -67,6 +72,12 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
   const [isTestingSupabase, setIsTestingSupabase] = useState(false);
   const [supabaseTestResult, setSupabaseTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [copiedSql, setCopiedSql] = useState(false);
+  const [copiedVercelUrlName, setCopiedVercelUrlName] = useState(false);
+  const [copiedVercelUrlVal, setCopiedVercelUrlVal] = useState(false);
+  const [copiedVercelKeyName, setCopiedVercelKeyName] = useState(false);
+  const [copiedVercelKeyVal, setCopiedVercelKeyVal] = useState(false);
+  const [copiedConfigSnippet, setCopiedConfigSnippet] = useState(false);
+  const [credentialsSource, setCredentialsSource] = useState(initialCreds.source);
 
   const [isSaving, setIsSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState(false);
@@ -85,6 +96,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
     if (res.success || (cleanUrl.includes('supabase.co') && cleanKey.length > 20)) {
       saveSupabaseCredentials(cleanUrl, cleanKey);
+      setCredentialsSource('localStorage');
       setSavedMsg(true);
       setTimeout(() => setSavedMsg(false), 4000);
     }
@@ -95,6 +107,24 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     navigator.clipboard?.writeText(script);
     setCopiedSql(true);
     setTimeout(() => setCopiedSql(false), 3000);
+  };
+
+  const handleCopyText = (text: string, setter: (val: boolean) => void) => {
+    navigator.clipboard?.writeText(text);
+    setter(true);
+    setTimeout(() => setter(false), 2500);
+  };
+
+  const generateConfigSnippet = () => {
+    return `/**
+ * Configuración central de Supabase para Ballonsdei
+ * Ubicación: src/config/supabaseConfig.ts
+ */
+export const DEFAULT_SUPABASE_CONFIG = {
+  url: '${supabaseUrl.trim()}',
+  anonKey: '${supabaseKey.trim()}',
+};
+`;
   };
 
   const handleFileUpload = (
@@ -691,6 +721,151 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 </>
               )}
             </button>
+          </div>
+
+          {/* Vercel Permanent Connection Guide & One-Click Tools */}
+          <div className="mt-5 pt-5 border-t border-emerald-200/80 bg-white/80 p-4 rounded-xl border border-emerald-200 space-y-4">
+            <div className="flex items-start gap-2.5">
+              <div className="p-2 bg-stone-900 text-white rounded-lg shrink-0 mt-0.5">
+                <Cloud className="w-4 h-4" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+                  <span>¿Por qué no se conecta en Vercel al montarlo desde GitHub?</span>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200">
+                    Solución Definitiva
+                  </span>
+                </h4>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Al subir a GitHub, los archivos locales <code className="px-1.5 py-0.5 bg-stone-100 rounded text-stone-800 font-mono text-[11px]">.env</code> no se suben por seguridad. Por eso, al montar tu web en Vercel, el sistema no tiene las claves y queda en modo desconectado para tus clientes.
+                </p>
+                <p className="text-xs text-stone-600 font-medium">
+                  Para que tu tienda esté <span className="text-emerald-700 font-bold">CONECTADA SIEMPRE en Vercel</span> para cualquier cliente desde cualquier teléfono o computadora, elige cualquiera de estas 2 opciones:
+                </p>
+              </div>
+            </div>
+
+            {/* Option 1: Vercel Environment Variables */}
+            <div className="p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded-full bg-emerald-600 text-white inline-flex items-center justify-center text-[10px]">1</span>
+                  OPCIÓN RECOMENDADA: Agregar Variables en Vercel
+                </span>
+                <span className="text-[10px] font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Sin tocar código
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                {/* Variable 1 */}
+                <div className="p-2.5 bg-white rounded-lg border border-emerald-200 shadow-2xs space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-semibold text-stone-700">Variable 1 (URL):</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyText('VITE_SUPABASE_URL', setCopiedVercelUrlName)}
+                      className="text-[10px] text-emerald-700 hover:text-emerald-900 font-medium flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedVercelUrlName ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedVercelUrlName ? '¡Copiado!' : 'Copiar Nombre'}</span>
+                    </button>
+                  </div>
+                  <div className="font-mono text-[11px] bg-stone-50 p-1.5 rounded border border-stone-200 text-stone-900 select-all">
+                    VITE_SUPABASE_URL
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[10px] text-stone-500">Valor de tu proyecto:</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyText(supabaseUrl || 'https://tu-proyecto.supabase.co', setCopiedVercelUrlVal)}
+                      className="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2 py-1 rounded font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      {copiedVercelUrlVal ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedVercelUrlVal ? '¡URL Copiada!' : 'Copiar Valor URL'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Variable 2 */}
+                <div className="p-2.5 bg-white rounded-lg border border-emerald-200 shadow-2xs space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-semibold text-stone-700">Variable 2 (Clave Anónima):</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyText('VITE_SUPABASE_ANON_KEY', setCopiedVercelKeyName)}
+                      className="text-[10px] text-emerald-700 hover:text-emerald-900 font-medium flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedVercelKeyName ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedVercelKeyName ? '¡Copiado!' : 'Copiar Nombre'}</span>
+                    </button>
+                  </div>
+                  <div className="font-mono text-[11px] bg-stone-50 p-1.5 rounded border border-stone-200 text-stone-900 select-all">
+                    VITE_SUPABASE_ANON_KEY
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[10px] text-stone-500">Valor de tu clave:</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyText(supabaseKey || 'tu-anon-public-key', setCopiedVercelKeyVal)}
+                      className="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-800 px-2 py-1 rounded font-medium flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      {copiedVercelKeyVal ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedVercelKeyVal ? '¡Clave Copiada!' : 'Copiar Valor Clave'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Steps in Vercel */}
+              <div className="p-3 bg-white/90 rounded-lg border border-emerald-200/70 text-xs text-stone-700 space-y-1">
+                <p className="font-semibold text-emerald-950">Pasos rápidos en Vercel:</p>
+                <ol className="list-decimal list-inside space-y-0.5 text-[11px] text-stone-600">
+                  <li>Entra a tu panel en <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-emerald-700 font-semibold underline inline-flex items-center gap-0.5">vercel.com <ExternalLink className="w-2.5 h-2.5" /></a> y haz clic en tu proyecto.</li>
+                  <li>Ve a la pestaña <strong>Settings</strong> &gt; <strong>Environment Variables</strong>.</li>
+                  <li>Agrega ambas variables: <code>VITE_SUPABASE_URL</code> y <code>VITE_SUPABASE_ANON_KEY</code>.</li>
+                  <li>Ve a la pestaña <strong>Deployments</strong>, haz clic en los 3 puntos <span className="font-mono font-bold">...</span> de tu último despliegue y selecciona <strong>Redeploy</strong>.</li>
+                </ol>
+              </div>
+            </div>
+
+            {/* Option 2: Direct File Config */}
+            <div className="p-3.5 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded-full bg-stone-700 text-white inline-flex items-center justify-center text-[10px]">2</span>
+                  OPCIÓN ALTERNATIVA: Archivo de Configuración Directo (100% Automático)
+                </span>
+                <span className="text-[10px] font-medium text-stone-600 bg-stone-200 px-2 py-0.5 rounded-full">
+                  Archivo en GitHub
+                </span>
+              </div>
+              <p className="text-[11px] text-stone-600">
+                Hemos creado el archivo <code className="px-1.5 py-0.5 bg-white border border-stone-300 rounded font-mono text-[10px] text-stone-900">src/config/supabaseConfig.ts</code> en el código. Si prefieres no configurar variables en Vercel, copia el bloque abajo y pégalo en ese archivo en tu computadora antes de hacer <code className="text-stone-800 font-bold font-mono">git push</code>:
+              </p>
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <span className="text-[10px] text-stone-500 font-mono truncate">
+                  src/config/supabaseConfig.ts
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleCopyText(generateConfigSnippet(), setCopiedConfigSnippet)}
+                  className="px-3 py-1.5 bg-stone-800 hover:bg-stone-900 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+                >
+                  {copiedConfigSnippet ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-300 font-semibold">¡Código de Configuración Copiado!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copiar Contenido para supabaseConfig.ts</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 

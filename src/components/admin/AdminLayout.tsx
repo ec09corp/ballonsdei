@@ -135,16 +135,26 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </div>
 
             {/* Supabase status badge in sidebar */}
-            <div className="mt-4 flex items-center gap-2 px-2.5 py-1 rounded bg-[#2D2320] border border-[#3E312B] text-[11px]">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isSupabaseConnected ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
-                }`}
-              />
-              <span className="text-[#BBA89E] truncate">
-                {isSupabaseConnected ? 'Supabase Activo' : 'Modo Preview'}
+            <button
+              type="button"
+              onClick={() => onSelectTab('settings')}
+              className="mt-4 w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#2D2320] hover:bg-[#382B27] border border-[#3E312B] text-[11px] transition-colors cursor-pointer text-left"
+              title={isSupabaseConnected ? 'Base de datos en la nube activa' : 'Haz clic para conectar Supabase en Vercel'}
+            >
+              <div className="flex items-center gap-2 truncate">
+                <span
+                  className={`w-2 h-2 rounded-full shrink-0 ${
+                    isSupabaseConnected ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
+                  }`}
+                />
+                <span className="text-[#D5C7C0] truncate text-[10.5px]">
+                  {isSupabaseConnected ? 'Supabase Conectado' : 'Conectar Supabase (Vercel)'}
+                </span>
+              </div>
+              <span className="text-[9px] text-[#A68F83] uppercase tracking-wider shrink-0 ml-1">
+                {isSupabaseConnected ? 'Listo' : 'Configurar'}
               </span>
-            </div>
+            </button>
           </div>
 
           {/* Navigation Links */}

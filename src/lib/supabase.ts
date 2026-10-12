@@ -1,21 +1,69 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { processImageFile } from './imageUtils';
+import { DEFAULT_SUPABASE_CONFIG } from '../config/supabaseConfig';
 
 const STORAGE_URL_KEY = 'ballonsdei_supabase_url';
 const STORAGE_ANON_KEY = 'ballonsdei_supabase_key';
 
-// Read from env or localStorage
-export function getSupabaseCredentials(): { url: string; anonKey: string } {
-  const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
-  const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+export function isValidSupabaseUrl(url?: string): boolean {
+  if (!url) return false;
+  const clean = url.trim();
+  return Boolean(
+    clean.startsWith('https://') &&
+    clean.includes('.supabase.co') &&
+    !clean.includes('your-project') &&
+    !clean.includes('xyzabcdefg')
+  );
+}
 
+export function isValidSupabaseKey(key?: string): boolean {
+  if (!key) return false;
+  const clean = key.trim();
+  return Boolean(
+    clean.length > 20 &&
+    !clean.includes('your-anon') &&
+    !clean.includes('your-key')
+  );
+}
+
+// Read from localStorage (admin testing) > env vars (Vercel) > default config (direct file)
+export function getSupabaseCredentials(): { url: string; anonKey: string; source: 'localStorage' | 'env' | 'config' | 'none' } {
+  // 1. Browser localStorage (allows override from Admin panel)
   const storedUrl = typeof window !== 'undefined' ? (localStorage.getItem(STORAGE_URL_KEY) || '').trim() : '';
   const storedKey = typeof window !== 'undefined' ? (localStorage.getItem(STORAGE_ANON_KEY) || '').trim() : '';
 
-  const url = storedUrl || envUrl;
-  const anonKey = storedKey || envKey;
+  // 2. Vite & Vercel Environment Variables (supports both VITE_ and non-prefixed)
+  const metaEnv = (import.meta as any).env || {};
+  const envUrl = (metaEnv.VITE_SUPABASE_URL || metaEnv.SUPABASE_URL || '').trim();
+  const envKey = (metaEnv.VITE_SUPABASE_ANON_KEY || metaEnv.SUPABASE_ANON_KEY || '').trim();
 
-  return { url, anonKey };
+  // 3. Central direct config file (src/config/supabaseConfig.ts)
+  const configUrl = (DEFAULT_SUPABASE_CONFIG?.url || '').trim();
+  const configKey = (DEFAULT_SUPABASE_CONFIG?.anonKey || '').trim();
+
+  let finalUrl = '';
+  let finalKey = '';
+  let source: 'localStorage' | 'env' | 'config' | 'none' = 'none';
+
+  if (isValidSupabaseUrl(storedUrl) && isValidSupabaseKey(storedKey)) {
+    finalUrl = storedUrl;
+    finalKey = storedKey;
+    source = 'localStorage';
+  } else if (isValidSupabaseUrl(envUrl) && isValidSupabaseKey(envKey)) {
+    finalUrl = envUrl;
+    finalKey = envKey;
+    source = 'env';
+  } else if (isValidSupabaseUrl(configUrl) && isValidSupabaseKey(configKey)) {
+    finalUrl = configUrl;
+    finalKey = configKey;
+    source = 'config';
+  } else {
+    // Partial fallback for display in Admin
+    finalUrl = storedUrl || envUrl || configUrl;
+    finalKey = storedKey || envKey || configKey;
+  }
+
+  return { url: finalUrl, anonKey: finalKey, source };
 }
 
 export function checkIsSupabaseConfigured(urlInput?: string, keyInput?: string): boolean {
@@ -23,15 +71,7 @@ export function checkIsSupabaseConfigured(urlInput?: string, keyInput?: string):
   const testUrl = (urlInput ?? currentUrl).trim();
   const testKey = (keyInput ?? currentKey).trim();
 
-  return Boolean(
-    testUrl && 
-    testKey && 
-    testUrl.startsWith('https://') && 
-    testUrl.includes('.supabase.co') &&
-    !testUrl.includes('your-project') &&
-    testKey.length > 20 &&
-    !testKey.includes('your-anon')
-  );
+  return isValidSupabaseUrl(testUrl) && isValidSupabaseKey(testKey);
 }
 
 export let isSupabaseConfigured: boolean = checkIsSupabaseConfigured();

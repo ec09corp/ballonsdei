@@ -122,22 +122,22 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const isLowStock = product.stock > 0 && product.stock <= product.minimum_stock;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/60 backdrop-blur-sm overflow-hidden animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-sm overflow-hidden animate-fade-in">
       <div 
-        className="relative w-full max-w-5xl bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col h-[94dvh] max-h-[94dvh] animate-modal-enter"
+        className="relative w-full max-w-5xl bg-[#FAF8F5] rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden my-0 sm:my-auto border-t sm:border border-[#E8DED7] flex flex-col h-[94dvh] max-h-[94dvh] animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#EBE2DB] bg-white">
-          <div className="flex items-center gap-2 text-xs text-[#8A796F] font-light">
-            <span className="uppercase tracking-widest text-[#763D8B] font-medium">BALLONSDEI</span>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[#EBE2DB] bg-white">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-[#8A796F] font-light">
+            <span className="uppercase tracking-widest text-[#763D8B] font-bold text-[11px]">BALLONSDEI</span>
             <span>/</span>
-            <span>{isRental ? 'Alquiler para Eventos' : isCustomizing ? 'Regalo Personalizable' : 'Diseño de Colección'}</span>
-            <span>/</span>
-            <span className="truncate max-w-[200px] text-[#423530]">{product.name}</span>
+            <span className="hidden sm:inline">{isRental ? 'Alquiler para Eventos' : isCustomizing ? 'Personalizable' : 'Colección'}</span>
+            <span className="hidden sm:inline">/</span>
+            <span className="truncate max-w-[130px] sm:max-w-[200px] text-[#423530] font-medium">{product.name}</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={handleShare}
               className="p-2 text-[#7A6B63] hover:text-[#763D8B] hover:bg-[#F2ECE6] rounded-full transition-colors cursor-pointer"
@@ -158,39 +158,39 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
         {/* Mode Switcher: Diseño Original vs Modificar a mi Gusto */}
         {!isRental && (
-          <div className="px-4 sm:px-8 pt-3 pb-2 bg-white border-b border-[#F0E8E2]">
-            <div className="bg-[#FAF4F7] p-1 rounded-xl border border-[#E8DED7] flex items-center gap-1.5 max-w-md mx-auto shadow-2xs">
+          <div className="px-3 sm:px-8 pt-2.5 pb-2 bg-white border-b border-[#F0E8E2]">
+            <div className="bg-[#FAF4F7] p-1 rounded-xl border border-[#E8DED7] flex items-center gap-1 max-w-md mx-auto shadow-2xs">
               <button
                 type="button"
                 onClick={() => setIsCustomizing(false)}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold chip-spring cursor-pointer flex items-center justify-center gap-2 ${
+                className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-semibold chip-spring cursor-pointer flex items-center justify-center gap-1.5 truncate ${
                   !isCustomizing
                     ? 'bg-white text-[#241A23] shadow-xs border border-[#EAE3DC]'
                     : 'text-[#6E5A69] hover:text-[#241A23]'
                 }`}
               >
-                <Gift className="w-3.5 h-3.5 text-[#763D8B]" />
-                <span>Diseño de Colección {isFixedGift ? '(Fijo)' : ''}</span>
+                <Gift className="w-3.5 h-3.5 text-[#763D8B] shrink-0" />
+                <span className="truncate">Diseño de Colección</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setIsCustomizing(true)}
-                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold chip-spring cursor-pointer flex items-center justify-center gap-2 ${
+                className={`flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-semibold chip-spring cursor-pointer flex items-center justify-center gap-1.5 truncate ${
                   isCustomizing
                     ? 'bg-[#763D8B] text-white shadow-xs'
                     : 'text-[#6E5A69] hover:text-[#763D8B]'
                 }`}
               >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#F3E2C4]" />
-                <span>Modificar a mi Gusto</span>
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#F3E2C4] shrink-0" />
+                <span className="truncate">Modificar a mi Gusto</span>
               </button>
             </div>
             
-            <p className="text-[11px] text-[#6E5A69] text-center mt-1.5 font-light">
+            <p className="text-[10px] sm:text-[11px] text-[#6E5A69] text-center mt-1 font-light truncate sm:whitespace-normal">
               {!isCustomizing 
-                ? '🌸 Arreglo de autor listo para enviar tal como se ve en la foto. ¿Deseas cambiarle algo? Selecciona «Modificar a mi Gusto».'
-                : '🎨 Taller de Personalización Activo: Modifica el tipo de globo, la dedicatoria en vinilo, cintas y peluches a tu gusto en tiempo real.'}
+                ? '🌸 Arreglo de autor listo para enviar tal como se ve en la foto.'
+                : '🎨 Modifica globos, vinilo, cintas y peluches a tu gusto en tiempo real.'}
             </p>
           </div>
         )}

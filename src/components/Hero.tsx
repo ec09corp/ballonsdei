@@ -186,9 +186,9 @@ export const Hero: React.FC<HeroProps> = ({ settings, onExplore, onOpenCustomize
                   </span>
                 </div>
 
-                {/* Bottom Workshop Commitment Badge */}
+                {/* Desktop/Tablet Workshop Commitment Badge */}
                 <div
-                  className="absolute bottom-5 left-5 right-5 p-4 sm:p-5 bg-white/95 backdrop-blur-md rounded-xl border border-[#EAE3DC] shadow-xl flex items-center justify-between gap-4 transition-transform duration-300 ease-out"
+                  className="hidden sm:flex absolute bottom-5 left-5 right-5 p-4 sm:p-5 bg-white/95 backdrop-blur-md rounded-xl border border-[#EAE3DC] shadow-xl items-center justify-between gap-4 transition-transform duration-300 ease-out"
                   style={{
                     transform: `translate3d(0, ${floatOffset}px, 0)`,
                   }}
@@ -214,6 +214,29 @@ export const Hero: React.FC<HeroProps> = ({ settings, onExplore, onOpenCustomize
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
+              </div>
+
+              {/* Mobile-Only Workshop Commitment Card (Positioned neatly below the photo so the entire arrangement photo is 100% visible) */}
+              <div className="sm:hidden mt-3 p-3.5 bg-white/95 backdrop-blur-md rounded-xl border border-[#EAE3DC] shadow-sm flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="text-[9px] text-[#763D8B] font-bold tracking-[0.2em] uppercase block">
+                    BALLONSDEI · GARANTÍA ATELIER
+                  </span>
+                  <span className="font-serif text-sm font-medium text-[#241A23] truncate block">
+                    {settings.hero_badge_title || 'Bouquet Imperial & Globos con Dedicatoria'}
+                  </span>
+                  <span className="text-[10px] text-[#7A6B76] font-light block">
+                    Enviamos foto de confirmación antes del despacho
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onExplore('flores')}
+                  className="p-2.5 bg-[#763D8B] text-white rounded-full shadow-xs cursor-pointer shrink-0 active:scale-95"
+                  aria-label="Ver creación destacada"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>
