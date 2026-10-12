@@ -409,19 +409,19 @@ export const InteractiveArrangementCanvas: React.FC<InteractiveArrangementCanvas
 
       {/* Main Visual Canvas Frame (Warm Stone Atelier Canvas Texture - Not black, not white) */}
       <div 
-        className="relative w-full rounded-3xl overflow-hidden border-2 border-[#D7C7B9] bg-gradient-to-b from-[#EFE6DD] via-[#E4D7CC] to-[#D5C2B3] shadow-inner flex items-center justify-center p-2 sm:p-4 min-h-[380px] sm:min-h-[460px]"
+        className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-[#D7C7B9] bg-gradient-to-b from-[#EFE6DD] via-[#E4D7CC] to-[#D5C2B3] shadow-inner flex items-center justify-center p-2 sm:p-3 aspect-square max-h-[360px] sm:max-h-[440px]"
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
       >
         {/* Pedestal Surface Shadow Effect */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[70%] h-16 rounded-[50%] bg-gradient-to-b from-[#CDBEB0] to-[#B3A192] shadow-[0_12px_30px_rgba(40,25,20,0.3)] pointer-events-none opacity-80" />
+        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-[70%] h-12 sm:h-16 rounded-[50%] bg-gradient-to-b from-[#CDBEB0] to-[#B3A192] shadow-[0_12px_30px_rgba(40,25,20,0.3)] pointer-events-none opacity-80" />
 
         {/* Scalable Canvas Container */}
         <div
           id="main-canvas-surface"
           ref={activeContainer as React.RefObject<HTMLDivElement>}
           onClick={handleCanvasClick}
-          className="relative w-full max-w-[480px] aspect-square rounded-2xl overflow-hidden bg-white/40 backdrop-blur-[1px] border border-white/60 shadow-xl transition-transform duration-100 ease-out"
+          className="relative w-full h-full max-w-[340px] sm:max-w-[400px] aspect-square rounded-2xl overflow-hidden bg-white/40 backdrop-blur-[1px] border border-white/60 shadow-xl transition-transform duration-100 ease-out"
           style={{
             transform: `scale(${zoom})`,
             transformOrigin: 'center center',

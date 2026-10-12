@@ -206,7 +206,7 @@ export const CustomizerElementPanel: React.FC<CustomizerElementPanelProps> = ({
       )}
 
       {/* 3. MAIN PANEL BODY: TEXT BUILDER OR CATALOG OF ELEMENTS */}
-      <div className="p-3 sm:p-4 flex-1 overflow-y-auto max-h-[460px]">
+      <div className="p-3 sm:p-4 flex-1 overflow-y-auto min-h-[260px] max-h-[540px]">
         {activeCategory === 'textos' ? (
           /* ======================================= */
           /* TEXT PERSONALIZATION BUILDER            */

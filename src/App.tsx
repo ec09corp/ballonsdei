@@ -26,6 +26,7 @@ import { AdminProduction } from './components/admin/AdminProduction';
 import { AdminRentals } from './components/admin/AdminRentals';
 import { AdminSettings } from './components/admin/AdminSettings';
 import { AdminCustomizerElements } from './components/admin/AdminCustomizerElements';
+import { AdminExtras } from './components/admin/AdminExtras';
 import { ArrangementCustomizerModal } from './components/customizer/ArrangementCustomizerModal';
 
 // Services & Data
@@ -218,6 +219,9 @@ function MainApp() {
             onRefresh={loadAllData}
           />
         )}
+        {adminTab === 'extras' && (
+          <AdminExtras />
+        )}
         {adminTab === 'customizer' && (
           <AdminCustomizerElements />
         )}
@@ -313,17 +317,6 @@ function MainApp() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveCategoryFilter('personalizables')}
-              className={`chip-spring px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer flex items-center gap-1.5 ${
-                activeCategoryFilter === 'personalizables'
-                  ? 'bg-[#763D8B] text-white shadow-sm border border-[#763D8B]'
-                  : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
-              }`}
-            >
-              <span>🎨 Personalizables (A tu Gusto)</span>
-            </button>
-            <button
-              type="button"
               onClick={() => setActiveCategoryFilter('regalos-fijos')}
               className={`chip-spring px-4 py-2 rounded-full whitespace-nowrap font-medium cursor-pointer flex items-center gap-1.5 ${
                 activeCategoryFilter === 'regalos-fijos'
@@ -331,7 +324,7 @@ function MainApp() {
                   : 'bg-white text-stone-700 hover:bg-[#FAF4F7] border border-[#E4D7E0]'
               }`}
             >
-              <span>💎 Diseños de Colección (Fijos)</span>
+              <span>💎 Diseños de Colección</span>
             </button>
             {categories
               .filter((c) => c.active && c.slug !== 'regalos-fijos' && c.slug !== 'personalizables')
@@ -355,45 +348,11 @@ function MainApp() {
           </div>
         </div>
 
-        {/* Dynamic Gift Customization Guidance Banner */}
-        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-white border border-[#EAE3DC] shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-10 h-10 rounded-full bg-[#763D8B]/10 flex items-center justify-center text-[#763D8B] shrink-0 mt-0.5 sm:mt-0">
-              <SlidersHorizontal className="w-5 h-5 text-[#763D8B]" />
-            </div>
-            <div>
-              <h3 className="font-serif text-base sm:text-lg text-[#241A23] font-normal">
-                {activeCategoryFilter === 'personalizables'
-                  ? 'Estudio de Regalos Personalizables'
-                  : activeCategoryFilter === 'regalos-fijos'
-                  ? 'Colección de Regalos Fijos'
-                  : '¿Cómo elegir tu Regalo Ideal?'}
-              </h3>
-              <p className="text-xs text-[#6E5A69] font-light max-w-2xl mt-0.5 leading-relaxed">
-                {activeCategoryFilter === 'personalizables'
-                  ? 'Tú tienes el control total: elige la base floral, el tipo de globo, la dedicatoria en vinilo, cintas y peluches con previsualización en vivo.'
-                  : activeCategoryFilter === 'regalos-fijos'
-                  ? 'Diseños icónicos listos para entregar tal como se ven en la foto. ¿Quieres cambiarle algo? Pulsa «Modificar» en cualquier arreglo para adaptarlo.'
-                  : 'Los Regalos Fijos vienen prediseñados y listos para enviar. Si deseas cambiar el tipo de globo, mensaje en vinilo o accesorios, puedes pulsar «Modificar» o «Personalizar» sobre cualquier producto.'}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => handleOpenCustomizer()}
-            className="btn-spring-action text-xs font-semibold px-4 py-2.5 bg-[#FAF4F7] hover:bg-[#763D8B] text-[#763D8B] hover:text-white border border-[#763D8B]/30 rounded-full shrink-0 flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>Lienzo 2D Interactivo</span>
-          </button>
-        </div>
-
         {/* Product Grid */}
         {isLoading ? (
           <div className="py-24 text-center text-stone-500 text-sm font-light space-y-3">
             <div className="w-8 h-8 mx-auto border-2 border-[#763D8B] border-t-transparent rounded-full animate-spin" />
-            <p>Cargando creaciones del atelier...</p>
+            <p>Cargando creaciones de Ballonsdei...</p>
           </div>
         ) : displayProducts.length === 0 ? (
           <div className="py-20 text-center max-w-md mx-auto space-y-4 bg-white rounded-3xl p-8 border border-[#EAE3DC] shadow-xs">
@@ -422,7 +381,6 @@ function MainApp() {
                 key={prod.id}
                 product={prod}
                 onViewProduct={(p) => setSelectedProduct(p)}
-                onCustomizeProduct={(p) => handleOpenCustomizer(p)}
               />
             ))}
           </div>
@@ -472,6 +430,14 @@ function MainApp() {
       <CartDrawer
         settings={settings}
         onProceedToCheckout={() => setIsCheckoutOpen(true)}
+        onCustomizeItem={(productId) => {
+          const prod = products.find((p) => p.id === productId);
+          if (prod) {
+            handleOpenCustomizer(prod);
+          } else {
+            handleOpenCustomizer();
+          }
+        }}
       />
 
       <CheckoutModal

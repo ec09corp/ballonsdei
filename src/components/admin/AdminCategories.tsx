@@ -183,27 +183,28 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-[#EDE5DF] overflow-hidden flex flex-col">
-            <div className="p-5 border-b border-[#EBE2DB] bg-[#FAF8F5] flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50 backdrop-blur-xs overflow-hidden">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-[#EDE5DF] overflow-hidden flex flex-col max-h-[92dvh]">
+            <div className="p-4 sm:p-5 border-b border-[#EBE2DB] bg-[#FAF8F5] flex items-center justify-between shrink-0">
               <h3 className="font-serif text-lg font-medium text-[#2E2421]">
                 {editingCategory ? `Editar Categoría: ${editingCategory.name}` : 'Crear Nueva Categoría'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-[#7A6B63] hover:text-[#2E2421] rounded-full"
+                className="p-1.5 text-[#7A6B63] hover:text-[#2E2421] rounded-full cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-6 space-y-4 text-xs">
-              {errorMsg && (
-                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
+            <form onSubmit={handleSave} className="flex flex-col flex-1 overflow-hidden text-xs">
+              <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+                {errorMsg && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
 
               <div>
                 <label className="text-xs font-medium text-[#423530] block mb-1">Nombre *</label>
@@ -260,24 +261,25 @@ export const AdminCategories: React.FC<AdminCategoriesProps> = ({
                   />
                 </div>
               </div>
+            </div>
 
-              <div className="pt-4 border-t border-[#EBE2DB] flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border border-[#D5C2B8] rounded-lg text-[#423530]"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-5 py-2 bg-[#8D5844] hover:bg-[#744533] text-white rounded-lg font-medium"
-                >
-                  {isSaving ? 'Guardando...' : 'Guardar Categoría'}
-                </button>
-              </div>
-            </form>
+            <div className="p-4 border-t border-[#EBE2DB] bg-white flex items-center justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 border border-[#D5C2B8] rounded-lg text-[#423530] cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="px-5 py-2 bg-[#8D5844] hover:bg-[#744533] text-white rounded-lg font-medium cursor-pointer"
+              >
+                {isSaving ? 'Guardando...' : 'Guardar Categoría'}
+              </button>
+            </div>
+          </form>
           </div>
         </div>
       )}

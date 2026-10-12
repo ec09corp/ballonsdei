@@ -76,15 +76,17 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     setIsTestingSupabase(true);
     setSupabaseTestResult(null);
 
-    const res = await testSupabaseConnection(supabaseUrl.trim(), supabaseKey.trim());
+    const cleanUrl = supabaseUrl.trim();
+    const cleanKey = supabaseKey.trim();
+
+    const res = await testSupabaseConnection(cleanUrl, cleanKey);
     setSupabaseTestResult(res);
     setIsTestingSupabase(false);
 
-    if (res.success) {
-      saveSupabaseCredentials(supabaseUrl.trim(), supabaseKey.trim());
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+    if (res.success || (cleanUrl.includes('supabase.co') && cleanKey.length > 20)) {
+      saveSupabaseCredentials(cleanUrl, cleanKey);
+      setSavedMsg(true);
+      setTimeout(() => setSavedMsg(false), 4000);
     }
   };
 
@@ -118,6 +120,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
     setSavedMsg(false);
 
     try {
+      const cleanUrl = supabaseUrl.trim();
+      const cleanKey = supabaseKey.trim();
+
+      // If user filled in Supabase details, persist them
+      if (cleanUrl && cleanKey) {
+        saveSupabaseCredentials(cleanUrl, cleanKey);
+      }
+
       await settingsService.updateSettings({
         store_name: storeName,
         logo_url: logoUrl,

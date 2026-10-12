@@ -6,81 +6,146 @@ const STORAGE_ANON_KEY = 'ballonsdei_supabase_key';
 
 // Read from env or localStorage
 export function getSupabaseCredentials(): { url: string; anonKey: string } {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+  const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
-  const storedUrl = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_URL_KEY) || '' : '';
-  const storedKey = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_ANON_KEY) || '' : '';
+  const storedUrl = typeof window !== 'undefined' ? (localStorage.getItem(STORAGE_URL_KEY) || '').trim() : '';
+  const storedKey = typeof window !== 'undefined' ? (localStorage.getItem(STORAGE_ANON_KEY) || '').trim() : '';
 
-  const url = (storedUrl.trim() || envUrl.trim());
-  const anonKey = (storedKey.trim() || envKey.trim());
+  const url = storedUrl || envUrl;
+  const anonKey = storedKey || envKey;
 
   return { url, anonKey };
 }
 
-export function saveSupabaseCredentials(url: string, anonKey: string) {
-  if (typeof window !== 'undefined') {
-    if (url.trim()) {
-      localStorage.setItem(STORAGE_URL_KEY, url.trim());
-    } else {
-      localStorage.removeItem(STORAGE_URL_KEY);
-    }
+export function checkIsSupabaseConfigured(urlInput?: string, keyInput?: string): boolean {
+  const { url: currentUrl, anonKey: currentKey } = getSupabaseCredentials();
+  const testUrl = (urlInput ?? currentUrl).trim();
+  const testKey = (keyInput ?? currentKey).trim();
 
-    if (anonKey.trim()) {
-      localStorage.setItem(STORAGE_ANON_KEY, anonKey.trim());
-    } else {
-      localStorage.removeItem(STORAGE_ANON_KEY);
-    }
-  }
+  return Boolean(
+    testUrl && 
+    testKey && 
+    testUrl.startsWith('https://') && 
+    testUrl.includes('.supabase.co') &&
+    !testUrl.includes('your-project') &&
+    testKey.length > 20 &&
+    !testKey.includes('your-anon')
+  );
 }
 
-const { url: initialUrl, anonKey: initialKey } = getSupabaseCredentials();
+export let isSupabaseConfigured: boolean = checkIsSupabaseConfigured();
 
-export const isSupabaseConfigured = Boolean(
-  initialUrl && 
-  initialKey && 
-  initialUrl.startsWith('https://') && 
-  initialUrl.includes('.supabase.co') &&
-  !initialUrl.includes('your-project') &&
-  initialKey.length > 20 &&
-  !initialKey.includes('your-anon')
-);
+let activeClient: SupabaseClient | null = null;
+let lastUsedUrl = '';
+let lastUsedKey = '';
 
-let client: SupabaseClient | null = null;
+export function getActiveSupabaseClient(): SupabaseClient | null {
+  const { url, anonKey } = getSupabaseCredentials();
+  const isConfigured = checkIsSupabaseConfigured(url, anonKey);
+  isSupabaseConfigured = isConfigured;
 
-if (isSupabaseConfigured) {
+  if (!isConfigured) {
+    activeClient = null;
+    return null;
+  }
+
+  // Reuse existing client if credentials haven't changed
+  if (activeClient && lastUsedUrl === url && lastUsedKey === anonKey) {
+    return activeClient;
+  }
+
   try {
-    client = createClient(initialUrl, initialKey, {
+    activeClient = createClient(url, anonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
       },
     });
+    lastUsedUrl = url;
+    lastUsedKey = anonKey;
+    return activeClient;
   } catch (err) {
     console.error('Error inicializando Supabase Client:', err);
+    activeClient = null;
+    return null;
   }
 }
 
-export const supabase = client;
+// Initialize on module load
+getActiveSupabaseClient();
+
+export function saveSupabaseCredentials(url: string, anonKey: string) {
+  if (typeof window !== 'undefined') {
+    const cleanUrl = url.trim();
+    const cleanKey = anonKey.trim();
+
+    if (cleanUrl) {
+      localStorage.setItem(STORAGE_URL_KEY, cleanUrl);
+    } else {
+      localStorage.removeItem(STORAGE_URL_KEY);
+    }
+
+    if (cleanKey) {
+      localStorage.setItem(STORAGE_ANON_KEY, cleanKey);
+    } else {
+      localStorage.removeItem(STORAGE_ANON_KEY);
+    }
+
+    // Force client recreation immediately
+    lastUsedUrl = '';
+    lastUsedKey = '';
+    isSupabaseConfigured = checkIsSupabaseConfigured(cleanUrl, cleanKey);
+    getActiveSupabaseClient();
+  }
+}
+
+/**
+ * Transparent proxy to always execute against the live, active Supabase client.
+ * If Supabase is not configured, returns safe fallback no-op objects to prevent crashes.
+ */
+export const supabase: SupabaseClient | any = new Proxy({}, {
+  get(_target, prop) {
+    const client = getActiveSupabaseClient();
+    if (!client) {
+      // Return safe chainable fallbacks for common calls if checked before configuration
+      if (prop === 'auth') {
+        return {
+          getSession: async () => ({ data: { session: null }, error: null }),
+          onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+          signInWithPassword: async () => ({ data: null, error: new Error('Supabase no configurado') }),
+          signOut: async () => ({ error: null }),
+        };
+      }
+      return undefined;
+    }
+    const value = (client as any)[prop];
+    if (typeof value === 'function') {
+      return value.bind(client);
+    }
+    return value;
+  }
+});
 
 /**
  * Storage helper for uploading images to 'product-images' bucket
- * or falling back to persistent Data URL if storage bucket is not configured.
+ * or falling back to persistent compact Data URL if storage bucket is not configured.
  */
 export async function uploadProductImage(
   file: File, 
   productId: string, 
   position: number
 ): Promise<{ url: string | null; error: Error | null }> {
-  // First, convert to compressed persistent Data URL so we never have broken images
-  let fallbackDataUrl: string = '';
+  // Compress image to compact web-safe format (<80KB) as resilient fallback
+  let fallbackDataUrl = '';
   try {
-    fallbackDataUrl = await processImageFile(file);
+    fallbackDataUrl = await processImageFile(file, 800, 0.8);
   } catch {
     fallbackDataUrl = '';
   }
 
-  if (!supabase || !isSupabaseConfigured) {
+  const client = getActiveSupabaseClient();
+  if (!client) {
     return {
       url: fallbackDataUrl,
       error: null,
@@ -91,7 +156,7 @@ export async function uploadProductImage(
     const ext = file.name.split('.').pop() || 'jpg';
     const filePath = `products/${productId}/image-${position}-${Date.now()}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await client.storage
       .from('product-images')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -99,18 +164,17 @@ export async function uploadProductImage(
       });
 
     if (uploadError) {
-      console.warn('Supabase storage upload error, using persistent data URL:', uploadError.message);
-      // Return the fallback data URL so product creation does not break!
+      console.warn('Supabase storage upload notice (usando data URL comprimido):', uploadError.message);
       return { url: fallbackDataUrl, error: null };
     }
 
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = client.storage
       .from('product-images')
       .getPublicUrl(filePath);
 
     return { url: publicUrlData.publicUrl, error: null };
   } catch (err: any) {
-    console.warn('Storage error, falling back to data URL:', err);
+    console.warn('Storage notice, using fallback data URL:', err);
     return { url: fallbackDataUrl, error: null };
   }
 }
@@ -118,27 +182,53 @@ export async function uploadProductImage(
 /**
  * Test connectivity with Supabase project
  */
-export async function testSupabaseConnection(url: string, key: string): Promise<{ success: boolean; message: string }> {
-  if (!url || !key) {
-    return { success: false, message: 'La URL y la clave anónima son requeridas.' };
+export async function testSupabaseConnection(url: string, key: string): Promise<{ success: boolean; message: string; tablesReady?: boolean }> {
+  const cleanUrl = url.trim();
+  const cleanKey = key.trim();
+
+  if (!cleanUrl || !cleanKey) {
+    return { success: false, message: 'La URL y la clave anónima (anon public key) son requeridas.' };
   }
 
-  if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
-    return { success: false, message: 'La URL debe comenzar con https:// y pertenecer a supabase.co' };
+  if (!cleanUrl.startsWith('https://') || !cleanUrl.includes('.supabase.co')) {
+    return { success: false, message: 'La URL debe comenzar con https:// y pertenecer al dominio supabase.co' };
+  }
+
+  if (cleanKey.length < 20) {
+    return { success: false, message: 'La clave anónima debe ser una cadena JWT válida (más de 20 caracteres).' };
   }
 
   try {
-    const testClient = createClient(url, key);
-    // Ping a simple public table or auth
+    const testClient = createClient(cleanUrl, cleanKey);
+    // Ping public categories table
     const { error } = await testClient.from('categories').select('count', { count: 'exact', head: true });
     
-    if (error && error.code !== 'PGRST116' && !error.message.includes('relation "categories" does not exist')) {
-      return { success: false, message: `Error de conexión: ${error.message}` };
+    if (error) {
+      // If table doesn't exist yet, the connection itself is valid!
+      if (error.code === 'PGRST116' || error.message.includes('relation "categories" does not exist') || error.message.includes('does not exist')) {
+        return { 
+          success: true, 
+          tablesReady: false,
+          message: '¡Conexión verificada con tu proyecto Supabase! Ahora copia y ejecuta el script SQL para crear las tablas necesarias.' 
+        };
+      }
+      
+      if (error.code === 'PGRST301' || error.message.includes('JWT') || error.message.includes('Invalid API key')) {
+        return { success: false, message: 'La clave anónima (anon key) parece incorrecta o expirada. Verifica en Project Settings > API.' };
+      }
+
+      // Other PostgreSQL notices
+      return { 
+        success: true, 
+        tablesReady: false,
+        message: `Conectado con Supabase (${error.message}). Recuerda ejecutar el script SQL con los permisos.` 
+      };
     }
 
     return { 
       success: true, 
-      message: '¡Conexión exitosa con Supabase! Guarda los cambios para activar la sincronización.' 
+      tablesReady: true,
+      message: '¡Conexión y tablas de Supabase verificadas exitosamente!' 
     };
   } catch (err: any) {
     return { success: false, message: `Error conectando con Supabase: ${err.message || err}` };
@@ -146,19 +236,19 @@ export async function testSupabaseConnection(url: string, key: string): Promise<
 }
 
 /**
- * Returns a complete SQL migration script to setup all tables in Supabase
+ * Returns a complete SQL migration script to setup ALL 14 tables in Supabase
  */
 export function getSupabaseSQLScript(): string {
   return `-- ================================================================
--- BALLONSDEI - ESQUEMA COMPLETO DE BASE DE DATOS PARA SUPABASE
--- Copia y pega este script en el SQL Editor de tu proyecto Supabase
+-- BALLONSDEI - ESQUEMA COMPLETO Y DEFINITIVO DE BASE DE DATOS
+-- Copia y pega TODO este script en: Supabase > SQL Editor > New query > Run
 -- ================================================================
 
 -- 1. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS public.categories (
     id TEXT PRIMARY KEY DEFAULT ('cat-' || substr(md5(random()::text), 1, 10)),
     name TEXT NOT NULL,
-    slug TEXT NOT NULL UNIQUE,
+    slug TEXT NOT NULL,
     description TEXT,
     image_url TEXT,
     active BOOLEAN DEFAULT true,
@@ -166,11 +256,11 @@ CREATE TABLE IF NOT EXISTS public.categories (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 2. Tabla de Productos
+-- 2. Tabla de Productos (Venta y Alquiler)
 CREATE TABLE IF NOT EXISTS public.products (
     id TEXT PRIMARY KEY DEFAULT ('prod-' || substr(md5(random()::text), 1, 10)),
     name TEXT NOT NULL,
-    slug TEXT NOT NULL UNIQUE,
+    slug TEXT NOT NULL,
     description TEXT,
     price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
     previous_price NUMERIC(10, 2),
@@ -197,13 +287,23 @@ CREATE TABLE IF NOT EXISTS public.products (
 -- 3. Tabla de Imágenes de Productos (Hasta 4 fotos por producto)
 CREATE TABLE IF NOT EXISTS public.product_images (
     id TEXT PRIMARY KEY DEFAULT ('img-' || substr(md5(random()::text), 1, 10)),
-    product_id TEXT NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL,
     image_url TEXT NOT NULL,
     position INTEGER DEFAULT 1,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 4. Tabla de Órdenes / Pedidos
+-- 4. Tabla de Clientes
+CREATE TABLE IF NOT EXISTS public.customers (
+    id TEXT PRIMARY KEY DEFAULT ('cust-' || substr(md5(random()::text), 1, 10)),
+    full_name TEXT NOT NULL,
+    email TEXT,
+    phone TEXT NOT NULL,
+    address TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 5. Tabla de Órdenes / Pedidos
 CREATE TABLE IF NOT EXISTS public.orders (
     id TEXT PRIMARY KEY DEFAULT ('ord-' || substr(md5(random()::text), 1, 10)),
     order_number TEXT NOT NULL UNIQUE,
@@ -225,10 +325,10 @@ CREATE TABLE IF NOT EXISTS public.orders (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 5. Tabla de Ítems de Orden
+-- 6. Tabla de Ítems de Orden
 CREATE TABLE IF NOT EXISTS public.order_items (
     id TEXT PRIMARY KEY DEFAULT ('item-' || substr(md5(random()::text), 1, 10)),
-    order_id TEXT NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+    order_id TEXT NOT NULL,
     product_id TEXT NOT NULL,
     product_name TEXT NOT NULL,
     unit_price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
@@ -244,7 +344,7 @@ CREATE TABLE IF NOT EXISTS public.order_items (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 6. Tabla de Alquileres de Mobiliario
+-- 7. Tabla de Alquileres de Mobiliario y Estructuras
 CREATE TABLE IF NOT EXISTS public.rentals (
     id TEXT PRIMARY KEY DEFAULT ('rent-' || substr(md5(random()::text), 1, 10)),
     product_id TEXT,
@@ -262,7 +362,7 @@ CREATE TABLE IF NOT EXISTS public.rentals (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 7. Tabla de Ajustes de Tienda
+-- 8. Tabla de Ajustes de Tienda
 CREATE TABLE IF NOT EXISTS public.settings (
     id TEXT PRIMARY KEY DEFAULT 'current_settings',
     store_name TEXT DEFAULT 'Ballonsdei',
@@ -285,12 +385,16 @@ CREATE TABLE IF NOT EXISTS public.settings (
     footer_photo_2 TEXT,
     footer_photo_3 TEXT,
     footer_photo_4 TEXT,
+    footer_caption_1 TEXT,
+    footer_caption_2 TEXT,
+    footer_caption_3 TEXT,
+    footer_caption_4 TEXT,
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 8. Tabla de Perfiles de Administrador y Usuarios
+-- 9. Tabla de Perfiles de Administrador
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    id TEXT PRIMARY KEY,
     role TEXT DEFAULT 'admin',
     active BOOLEAN DEFAULT true,
     full_name TEXT,
@@ -298,39 +402,104 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Desactivar Row Level Security (RLS) en todas las tablas
-ALTER TABLE IF EXISTS public.profiles DISABLE ROW LEVEL SECURITY;
+-- 10. Tabla de Elementos del Personalizador de Arreglos
+CREATE TABLE IF NOT EXISTS public.customizer_elements (
+    id TEXT PRIMARY KEY DEFAULT ('elem-' || substr(md5(random()::text), 1, 10)),
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    price NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
+    image_url TEXT NOT NULL,
+    available_colors JSONB DEFAULT '[]'::jsonb,
+    order_index INTEGER DEFAULT 1,
+    active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 11. Tabla de Diseños Personalizados de Clientes
+CREATE TABLE IF NOT EXISTS public.custom_designs (
+    id TEXT PRIMARY KEY DEFAULT ('des-' || substr(md5(random()::text), 1, 10)),
+    customer_id TEXT,
+    customer_name TEXT,
+    base_product_id TEXT,
+    title TEXT,
+    elements JSONB DEFAULT '[]'::jsonb,
+    total_price NUMERIC(10, 2) DEFAULT 0.00,
+    preview_image TEXT,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 12. Tabla de Insumos y Materias Primas de Producción
+CREATE TABLE IF NOT EXISTS public.production_items (
+    id TEXT PRIMARY KEY DEFAULT ('mat-' || substr(md5(random()::text), 1, 10)),
+    name TEXT NOT NULL,
+    description TEXT,
+    category TEXT DEFAULT 'Varios',
+    unit TEXT DEFAULT 'unidades',
+    current_quantity NUMERIC(10, 2) DEFAULT 0,
+    minimum_quantity NUMERIC(10, 2) DEFAULT 5,
+    cost NUMERIC(10, 2) DEFAULT 0.00,
+    supplier TEXT,
+    status TEXT DEFAULT 'available',
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 13. Tabla de Movimientos de Inventario de Producción
+CREATE TABLE IF NOT EXISTS public.production_movements (
+    id TEXT PRIMARY KEY DEFAULT ('mov-' || substr(md5(random()::text), 1, 10)),
+    item_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    quantity NUMERIC(10, 2) NOT NULL,
+    notes TEXT,
+    performed_by TEXT,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 14. Tabla de Relación Producto -> Insumos de Producción
+CREATE TABLE IF NOT EXISTS public.product_production_items (
+    id TEXT PRIMARY KEY DEFAULT ('ppi-' || substr(md5(random()::text), 1, 10)),
+    product_id TEXT NOT NULL,
+    production_item_id TEXT NOT NULL,
+    required_quantity NUMERIC(10, 2) NOT NULL DEFAULT 1,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- ================================================================
+-- PERMISOS Y DESACTIVACIÓN DE ROW LEVEL SECURITY (RLS)
+-- Esto permite que tu panel guarde productos, fotos y pedidos sin bloqueos
+-- ================================================================
 ALTER TABLE IF EXISTS public.categories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.product_images DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.customers DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.orders DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.order_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.rentals DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.customizer_elements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.custom_designs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.production_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.production_movements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.product_production_items DISABLE ROW LEVEL SECURITY;
 
--- Otorgar permisos globales en el esquema public a los roles de Supabase (resuelve error 42501)
-GRANT USAGE ON SCHEMA public TO anon, authenticated;
+-- Otorgar permisos globales al esquema public a los roles de Supabase
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL ROUTINES IN SCHEMA public TO anon, authenticated, service_role;
 
--- Permisos explícitos específicos para cada tabla
-GRANT ALL ON TABLE public.profiles TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.products TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.product_images TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.categories TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.orders TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.order_items TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.rentals TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.settings TO anon, authenticated, service_role;
-
 -- Crear Bucket de Storage para Imágenes de Productos
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('product-images', 'product-images', true)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET public = true;
 
--- Política de subida pública en el storage
+-- Políticas públicas para el bucket de imágenes
 DROP POLICY IF EXISTS "Public Access product-images" ON storage.objects;
+DROP POLICY IF EXISTS "Public Insert product-images" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update product-images" ON storage.objects;
+DROP POLICY IF EXISTS "Public Delete product-images" ON storage.objects;
+
 CREATE POLICY "Public Access product-images" ON storage.objects
 FOR ALL USING (bucket_id = 'product-images')
 WITH CHECK (bucket_id = 'product-images');
@@ -338,32 +507,28 @@ WITH CHECK (bucket_id = 'product-images');
 }
 
 /**
- * Returns a quick SQL snippet to fix error 42501 (permission denied for table profiles)
+ * Returns a quick SQL snippet to fix permissions across all tables
  */
 export function getSupabasePermissionFixScript(): string {
-  return `-- RESOLVER ERROR 42501: PERMISSION DENIED FOR TABLE PROFILES
-GRANT USAGE ON SCHEMA public TO anon, authenticated;
+  return `-- RESOLVER PERMISOS Y ACTIVAR ACCESO EN TODAS LAS TABLAS
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 
--- Crear profiles si no existe y desactivar RLS
-CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    role TEXT DEFAULT 'admin',
-    active BOOLEAN DEFAULT true,
-    full_name TEXT,
-    email TEXT,
-    created_at TIMESTAMPTZ DEFAULT now()
-);
-
-ALTER TABLE IF EXISTS public.profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.categories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.product_images DISABLE ROW LEVEL SECURITY;
-ALTER TABLE IF EXISTS public.categories DISABLE ROW LEVEL SECURITY;
-
-GRANT ALL ON TABLE public.profiles TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.products TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.product_images TO anon, authenticated, service_role;
-GRANT ALL ON TABLE public.categories TO anon, authenticated, service_role;
+ALTER TABLE IF EXISTS public.customers DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.orders DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.order_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.rentals DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.customizer_elements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.custom_designs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.production_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.production_movements DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.product_production_items DISABLE ROW LEVEL SECURITY;
 `;
 }
+

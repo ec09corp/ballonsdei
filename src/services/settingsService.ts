@@ -26,7 +26,7 @@ function getLocalSettings(): StoreSettings {
         parsed.google_maps_url.includes('3kyhrTZrjEUyy8e9') ||
         parsed.google_maps_url.includes('3kyhrTZrj')
       ) {
-        parsed.google_maps_url = 'https://www.google.com/maps/search/?api=1&query=Ballonsdei+Panama';
+        parsed.google_maps_url = 'https://www.google.com/maps/search/?api=1&query=Ballonsdei+Colon+Panama';
       }
       return {
         ...INITIAL_SETTINGS,
@@ -68,37 +68,35 @@ export const settingsService = {
   },
 
   async updateSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
-    if (supabase && isSupabaseConfigured) {
-      try {
-        // Check if row exists
-        const { data: existing } = await supabase.from('settings').select('id').limit(1);
-
-        if (existing && existing.length > 0) {
-          const { data, error } = await supabase
-            .from('settings')
-            .update(settings)
-            .eq('id', existing[0].id)
-            .select()
-            .single();
-
-          if (!error && data) return data;
-        } else {
-          const { data, error } = await supabase
-            .from('settings')
-            .insert({ ...INITIAL_SETTINGS, ...settings })
-            .select()
-            .single();
-
-          if (!error && data) return data;
-        }
-      } catch (err) {
-        console.error('Error updating settings in Supabase:', err);
-      }
-    }
-
     const current = getLocalSettings();
     const updated = { ...current, ...settings };
     saveLocalSettings(updated);
+
+    if (supabase && isSupabaseConfigured) {
+      try {
+        const payload = {
+          id: 'current_settings',
+          ...INITIAL_SETTINGS,
+          ...current,
+          ...settings,
+        };
+
+        const { data, error } = await supabase
+          .from('settings')
+          .upsert(payload)
+          .select()
+          .maybeSingle();
+
+        if (error) {
+          console.warn('Notice updating settings in Supabase:', error.message);
+        } else if (data) {
+          return { ...updated, ...data };
+        }
+      } catch (err: any) {
+        console.error('Error updating settings in Supabase:', err.message || err);
+      }
+    }
+
     return updated;
   },
 };

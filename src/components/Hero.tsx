@@ -55,9 +55,9 @@ export const Hero: React.FC<HeroProps> = ({ settings, onExplore, onOpenCustomize
         {/* Editorial Top Origin Insignia */}
         <div className="text-center pb-6 sm:pb-10">
           <div className="inline-flex items-center gap-3 text-[10px] sm:text-[11px] font-semibold tracking-[0.28em] uppercase text-[#7D5B28]">
-            <span>ATELIER D'ART FLORAL</span>
+            <span>BALLONSDEI</span>
             <span className="text-[#C5A059]">✦</span>
-            <span>CIUDAD DE PANAMÁ</span>
+            <span>CIUDAD DE COLÓN</span>
             <span className="text-[#C5A059]">✦</span>
             <span>EST. 2024</span>
           </div>
@@ -70,7 +70,7 @@ export const Hero: React.FC<HeroProps> = ({ settings, onExplore, onOpenCustomize
           <div className="lg:col-span-6 space-y-6 sm:space-y-8 text-center lg:text-left">
             <div className="space-y-3">
               <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[#C5A059] block">
-                Alta Floristería & Globos de Autor
+                Obsequios Personalizados & Arreglos Florales Originales
               </span>
               <h1 className="font-serif text-4xl sm:text-5xl lg:text-[3.85rem] text-[#241A23] leading-[1.08] font-light tracking-tight">
                 {settings.hero_title || (
@@ -83,7 +83,7 @@ export const Hero: React.FC<HeroProps> = ({ settings, onExplore, onOpenCustomize
 
             <p className="text-base sm:text-lg text-[#6E5A69] font-light leading-relaxed max-w-xl mx-auto lg:mx-0">
               {settings.hero_subtitle ||
-                'Composiciones artesanales concebidas para celebrar instantes que importan. Rosas de corte fresco, globos con rotulación en vinilo de precisión y una plataforma de diseño 2D interactiva única en Panamá.'}
+                'Obsequios personalizados y arreglos florales originales concebidos para celebrar instantes inolvidables. Rosas de corte fresco, globos con rotulación en vinilo de precisión y entregas en toda la provincia de Colón.'}
             </p>
 
             {/* CTAs with Emil Kowalski Mechanical Physics */}
@@ -179,9 +179,10 @@ export const Hero: React.FC<HeroProps> = ({ settings, onExplore, onOpenCustomize
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1F1023]/60 via-transparent to-black/10 pointer-events-none" />
 
                 {/* Top Corner Seal */}
-                <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-sm border border-[#EAE3DC] shadow-xs">
+                <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-sm border border-[#EAE3DC] shadow-xs flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#763D8B]" />
                   <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-[#7D5B28]">
-                    Confección de Autor
+                    BALLONSDEI · DE AUTOR
                   </span>
                 </div>
 
@@ -232,7 +233,7 @@ export const Hero: React.FC<HeroProps> = ({ settings, onExplore, onOpenCustomize
                   Despacho en Hora VIP
                 </span>
                 <span className="text-[11px] text-[#7A6B76] font-light">
-                  Entregas programadas en Ciudad de Panamá
+                  Entregas programadas en Ciudad de Colón
                 </span>
               </div>
             </div>

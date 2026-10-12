@@ -81,21 +81,32 @@ export const orderService = {
         // 1. Find or create customer
         let customerId: string | null = null;
         try {
-          const { data: customerData } = await supabase
-            .from('customers')
-            .upsert(
-              {
+          if (orderData.customer_email) {
+            const { data: existingCust } = await supabase
+              .from('customers')
+              .select('id')
+              .eq('email', orderData.customer_email)
+              .maybeSingle();
+
+            if (existingCust) {
+              customerId = existingCust.id;
+            }
+          }
+
+          if (!customerId) {
+            const { data: customerData } = await supabase
+              .from('customers')
+              .insert({
                 full_name: orderData.customer_name,
-                email: orderData.customer_email,
+                email: orderData.customer_email || null,
                 phone: orderData.customer_phone,
                 address: orderData.delivery_address,
-              },
-              { onConflict: 'email' }
-            )
-            .select()
-            .single();
+              })
+              .select()
+              .maybeSingle();
 
-          if (customerData) customerId = customerData.id;
+            if (customerData) customerId = customerData.id;
+          }
         } catch (cErr) {
           console.warn('Customer upsert non-critical warning:', cErr);
         }

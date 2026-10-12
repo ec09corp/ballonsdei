@@ -70,20 +70,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 sm:px-10 shadow-xl rounded-2xl border border-[#E8DED7] space-y-6">
-          {/* Explanation Card answering the user's question */}
-          <div className="p-4 rounded-xl text-xs space-y-2 bg-[#FAF8F5] border border-[#E3D7CE]">
-            <div className="flex items-center gap-2 font-semibold text-[#382B26]">
-              <Info className="w-4 h-4 text-[#8D5844] shrink-0" />
-              <span>¿Por qué no te dejaba entrar con tu correo y contraseña?</span>
-            </div>
-            <p className="text-[11px] text-[#6B5A52] font-light leading-relaxed">
-              Supabase es una base de datos segura en la nube. Para que acepte un inicio de sesión, el usuario debe estar registrado en tu consola de Supabase (<code className="bg-[#EFE8E2] px-1 rounded">Authentication → Users</code>). Si ponías un correo no creado aún en Supabase, el servidor respondía que no existía.
-            </p>
-            <p className="text-[11px] text-[#8D5844] font-medium leading-relaxed">
-              ✓ <strong>Solución:</strong> Ahora el sistema intenta auto-registrarte en Supabase y además tienes el <strong>Acceso Directo Propietario</strong> para entrar sin contratiempos.
-            </p>
-          </div>
-
           {(localError || authError) && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />

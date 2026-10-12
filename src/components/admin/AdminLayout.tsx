@@ -23,6 +23,7 @@ export type AdminTab =
   | 'orders'
   | 'products'
   | 'categories'
+  | 'extras'
   | 'customizer'
   | 'inventory'
   | 'production'
@@ -52,6 +53,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'orders', label: 'Ventas & Pedidos', icon: ShoppingBag },
     { id: 'products', label: 'Productos', icon: Package },
     { id: 'categories', label: 'Categorías', icon: FolderTree },
+    { id: 'extras', label: 'Implementos & Extras', icon: Sparkles },
     { id: 'customizer', label: 'Personalización de arreglos', icon: Sparkles },
     { id: 'inventory', label: 'Inventario', icon: Warehouse },
     { id: 'production', label: 'Producción & Insumos', icon: Hammer },
@@ -65,27 +67,51 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F3EF] flex flex-col md:flex-row text-[#2E2421]">
-      {/* Mobile Header Bar */}
-      <div className="md:hidden bg-[#2A211E] text-white p-4 flex items-center justify-between border-b border-[#3E322D]">
+    <div className="min-h-screen bg-[#F7F3EF] flex flex-col lg:flex-row text-[#2E2421]">
+      {/* Mobile/Tablet Header Bar */}
+      <div className="lg:hidden bg-[#2A211E] text-white px-4 py-3 flex items-center justify-between border-b border-[#3E322D] sticky top-0 z-30 shadow-md">
         <div className="flex items-center gap-2">
-          <span className="font-serif text-lg tracking-widest font-medium uppercase">
-            {settings.store_name || 'BALLONSDEI'}
-          </span>
-          <span className="text-[9px] bg-[#8D5844] px-1.5 py-0.5 rounded uppercase">Admin</span>
+          <button
+            onClick={() => setMobileSidebarOpen(true)}
+            className="p-1.5 -ml-1 text-white/90 hover:text-white rounded-lg active:bg-white/10 cursor-pointer"
+            aria-label="Abrir menú de navegación"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <div>
+            <span className="font-serif text-base tracking-wider font-medium uppercase block leading-tight">
+              {settings.store_name || 'BALLONSDEI'}
+            </span>
+            <span className="text-[9px] text-[#A68F83] uppercase tracking-widest">
+              Panel Admin
+            </span>
+          </div>
         </div>
-        <button
-          onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-          className="p-1.5 text-white/80 hover:text-white"
-        >
-          {mobileSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onGoToStore}
+            className="px-2.5 py-1 text-[11px] font-medium bg-[#362B26] hover:bg-[#443731] text-[#E6C6B0] border border-[#4D3D36] rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <ExternalLink className="w-3 h-3" />
+            <span>Tienda</span>
+          </button>
+        </div>
       </div>
+
+      {/* Mobile/Tablet Backdrop Overlay */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 lg:hidden animate-fade-in"
+          onClick={() => setMobileSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Sidebar Navigation */}
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-[#231B18] text-[#D5C7C0] flex flex-col justify-between transition-transform duration-300 md:translate-x-0 ${
-          mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#231B18] text-[#D5C7C0] flex flex-col justify-between transition-transform duration-300 lg:translate-x-0 ${
+          mobileSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div>
@@ -102,7 +128,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               </div>
               <button
                 onClick={() => setMobileSidebarOpen(false)}
-                className="md:hidden text-white/60 hover:text-white"
+                className="lg:hidden text-white/60 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>

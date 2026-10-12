@@ -74,6 +74,9 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewDesign, setPreviewDesign] = useState<ArrangementDesignData | null>(null);
 
+  // Responsive studio tab for mobile/tablet screens: 'canvas' | 'elements' | 'summary'
+  const [mobileStudioTab, setMobileStudioTab] = useState<'canvas' | 'elements' | 'summary'>('canvas');
+
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
   // Sync base product when changed
@@ -382,36 +385,36 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-md overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-md overflow-hidden animate-fade-in">
       <div 
-        className="relative w-full max-w-6xl bg-[#FAF8F5] rounded-3xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col max-h-[96vh]"
+        className="relative w-full max-w-6xl bg-[#FAF8F5] rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col h-[94dvh] max-h-[94dvh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-5 sm:px-7 py-3.5 border-b border-[#EBE2DB] bg-white">
-          <div className="flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-xl bg-[#763D8B] text-white flex items-center justify-center shadow-xs">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#EBE2DB] bg-white shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-8 h-8 rounded-xl bg-[#763D8B] text-white flex items-center justify-center shadow-xs shrink-0">
               <SlidersHorizontal className="w-4 h-4 text-[#F6E3BA]" />
             </span>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-serif text-base sm:text-lg font-bold text-[#2E2421]">
+                <span className="font-serif text-base sm:text-lg font-bold text-[#2E2421] truncate">
                   Personalización de Arreglos
                 </span>
-                <span className="px-2 py-0.5 bg-[#763D8B]/10 text-[#763D8B] text-[10px] font-bold rounded-full uppercase">
+                <span className="hidden xs:inline-block px-2 py-0.5 bg-[#763D8B]/10 text-[#763D8B] text-[10px] font-bold rounded-full uppercase shrink-0">
                   Estudio Visual
                 </span>
               </div>
-              <p className="text-[11px] text-[#7A6B63] hidden sm:block">
+              <p className="text-[11px] text-[#7A6B63] hidden sm:block truncate">
                 Diseña, arrastra y combina flores, globos, peluches y dedicatorias a tu medida.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <span className="text-[10px] text-stone-500 block leading-tight">Total Estimado:</span>
-              <span className="text-lg font-bold text-[#763D8B]">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="text-right">
+              <span className="text-[10px] text-stone-500 block leading-tight">Total:</span>
+              <span className="text-base sm:text-lg font-bold text-[#763D8B]">
                 ${totalPrice.toFixed(2)}
               </span>
             </div>
@@ -427,229 +430,219 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
           </div>
         </div>
 
+        {/* Mobile & Tablet Studio Tab Switcher (Visible below lg breakpoint) */}
+        <div className="lg:hidden flex items-center bg-[#FAF6F2] p-1.5 border-b border-[#E8DDD4] shrink-0">
+          <button
+            type="button"
+            onClick={() => setMobileStudioTab('canvas')}
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              mobileStudioTab === 'canvas'
+                ? 'bg-[#763D8B] text-white shadow-xs'
+                : 'text-stone-600 hover:bg-stone-100'
+            }`}
+          >
+            <Palette className="w-3.5 h-3.5" />
+            <span>Lienzo ({elements.length + texts.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileStudioTab('elements')}
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              mobileStudioTab === 'elements'
+                ? 'bg-[#763D8B] text-white shadow-xs'
+                : 'text-stone-600 hover:bg-stone-100'
+            }`}
+          >
+            <Package className="w-3.5 h-3.5" />
+            <span>Agregar Elementos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileStudioTab('summary')}
+            className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              mobileStudioTab === 'summary'
+                ? 'bg-[#763D8B] text-white shadow-xs'
+                : 'text-stone-600 hover:bg-stone-100'
+            }`}
+          >
+            <Gift className="w-3.5 h-3.5" />
+            <span>Resumen</span>
+          </button>
+        </div>
+
         {/* Modal Scrollable Body */}
-        <div className="overflow-y-auto flex-1 p-4 sm:p-6 lg:p-7 space-y-7">
+        <div className="overflow-y-auto flex-1 p-3 sm:p-5 lg:p-6 space-y-4">
           
-          {/* ========================================================================= */}
-          {/* 1. SECCIÓN: IMAGEN DE REFERENCIA                                         */}
-          {/* ========================================================================= */}
-          <section className="bg-white rounded-2xl p-4 sm:p-6 border border-[#E8DED7] shadow-xs">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              {/* Reference Image Large Display with Carousel controls */}
-              <div className="relative w-full md:w-5/12 max-w-[340px] aspect-square rounded-2xl overflow-hidden bg-gradient-to-b from-[#F5EFEB] to-[#EAE2DC] border border-[#DFCFC1] shadow-inner shrink-0 group">
+          {/* Compact Reference Photo & Base Arrangement Strip */}
+          <section className="bg-white rounded-2xl p-3 sm:p-4 border border-[#E8DED7] shadow-2xs flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-stone-100 border border-[#DFCFC1] shrink-0">
                 <img
                   src={currentReferencePhoto}
-                  alt={currentProduct?.name || 'Arreglo de Referencia'}
-                  className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-300"
+                  alt={currentProduct?.name || 'Arreglo Base'}
+                  className="w-full h-full object-cover"
                 />
-
-                {/* Photo arrows if multiple photos */}
                 {productImages.length > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSelectedPhotoIndex((prev) =>
-                          prev === 0 ? productImages.length - 1 : prev - 1
-                        )
-                      }
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-stone-800 flex items-center justify-center shadow-md cursor-pointer transition-all"
-                      aria-label="Foto anterior"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSelectedPhotoIndex((prev) =>
-                          prev === productImages.length - 1 ? 0 : prev + 1
-                        )
-                      }
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-stone-800 flex items-center justify-center shadow-md cursor-pointer transition-all"
-                      aria-label="Foto siguiente"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </>
+                  <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[9px] font-bold text-center py-0.5">
+                    {selectedPhotoIndex + 1}/{productImages.length}
+                  </div>
                 )}
-
-                {/* Badge */}
-                <div className="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-xs">
-                  Foto de Referencia
-                </div>
-
-                {/* Indicator */}
-                <div className="absolute bottom-3 right-3 bg-white/90 text-stone-800 text-[10px] font-semibold px-2 py-0.5 rounded-md shadow-xs">
-                  {selectedPhotoIndex + 1} / {productImages.length}
-                </div>
               </div>
 
-              {/* Text & Base Product Details */}
-              <div className="flex-1 space-y-3">
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-[#C19B65]/15 text-[#8E6D38] text-[10px] font-bold uppercase rounded-full">
+                  <span className="px-2 py-0.2 bg-[#C19B65]/15 text-[#8E6D38] text-[9px] sm:text-[10px] font-bold uppercase rounded-full">
                     Arreglo Base
                   </span>
-                  <span className="text-xs text-stone-500">· SKU: {currentProduct?.sku || 'BD-ARREG'}</span>
+                  <span className="text-[10px] text-stone-500">SKU: {currentProduct?.sku || 'BD-ARREG'}</span>
                 </div>
-
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2E2421]">
-                  Personaliza tu arreglo
-                </h2>
-
-                <p className="text-xs sm:text-sm text-[#7A6B63] font-light leading-relaxed">
-                  Modifica el diseño como quieras y crea una idea de cómo quieres que quede tu arreglo. Agrega flores frescas, globos, chocolates, peluches y dedicatorias en vinilo.
-                </p>
-
-                {/* Base Product Selector (If user wants to choose another arrangement from catalog) */}
-                {allProducts.length > 1 && (
-                  <div className="pt-2">
-                    <label className="text-[11px] font-semibold text-stone-700 block mb-1">
-                      Cambiar Arreglo Base de Referencia:
-                    </label>
-                    <select
-                      value={currentProduct?.id || ''}
-                      onChange={(e) => {
-                        const found = allProducts.find((p) => p.id === e.target.value);
-                        if (found) {
-                          setSelectedProduct(found);
-                          setSelectedPhotoIndex(0);
-                          onSelectBaseProduct?.(found);
-                        }
-                      }}
-                      className="w-full max-w-sm text-xs p-2.5 rounded-xl border border-stone-300 bg-white text-stone-800 font-medium"
-                    >
-                      {allProducts.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name} — ${p.price.toFixed(2)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Thumbnails row for reference images */}
-                {productImages.length > 1 && (
-                  <div className="pt-2 flex items-center gap-2 overflow-x-auto">
-                    {productImages.map((img, idx) => (
-                      <button
-                        type="button"
-                        key={img.id || idx}
-                        onClick={() => setSelectedPhotoIndex(idx)}
-                        className={`chip-spring w-12 h-12 rounded-lg overflow-hidden border-2 cursor-pointer ${
-                          selectedPhotoIndex === idx
-                            ? 'border-[#763D8B] scale-105 shadow-xs'
-                            : 'border-transparent opacity-70 hover:opacity-100'
-                        }`}
-                      >
-                        <img
-                          src={img.image_url}
-                          alt="Miniatura"
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* ========================================================================= */}
-          {/* 2 & 3. LIENZO DE PERSONALIZACIÓN + PANEL DE ELEMENTOS                      */}
-          {/* Responsive Layout: Side-by-side on desktop, stacked on mobile            */}
-          {/* ========================================================================= */}
-          <section className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-[#763D8B] font-bold uppercase tracking-wider block">
-                  Lienzo Interactivo 2D
-                </span>
-                <h3 className="font-serif text-lg sm:text-xl font-bold text-[#2E2421]">
-                  Editor Visual de Composición
+                <h3 className="font-serif text-sm sm:text-base font-bold text-[#2E2421] truncate">
+                  {currentProduct?.name || 'Arreglo Personalizado'}
                 </h3>
-              </div>
-              <button
-                type="button"
-                onClick={handleClearCanvas}
-                className="text-xs text-stone-500 hover:text-rose-600 font-medium cursor-pointer"
-              >
-                Limpiar lienzo
-              </button>
-            </div>
-
-            {/* Canvas + Panel Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left on PC: The Interactive Canvas */}
-              <div className="lg:col-span-7 flex flex-col gap-2">
-                <InteractiveArrangementCanvas
-                  elements={elements}
-                  texts={texts}
-                  selectedId={selectedId}
-                  onSelectId={setSelectedId}
-                  onUpdateElements={handleUpdateElements}
-                  onUpdateTexts={handleUpdateTexts}
-                  onDeleteSelected={handleDeleteSelected}
-                  onDuplicateSelected={handleDuplicateSelected}
-                  onBringToFront={handleBringToFront}
-                  onSendToBack={handleSendToBack}
-                  onUndo={handleUndo}
-                  onRedo={handleRedo}
-                  canUndo={history.length > 0}
-                  canRedo={redoStack.length > 0}
-                  referenceImageUrl={currentReferencePhoto}
-                  canvasRef={canvasRef}
-                />
-              </div>
-
-              {/* Right on PC, Below on Mobile: The Elements Panel */}
-              <div className="lg:col-span-5 h-full">
-                <CustomizerElementPanel
-                  elementsList={catalogElements}
-                  selectedId={selectedId}
-                  placedElements={elements}
-                  placedTexts={texts}
-                  onAddElement={handleAddElement}
-                  onAddText={handleAddText}
-                  onUpdateSelectedColor={handleUpdateSelectedColor}
-                  onUpdateSelectedText={handleUpdateSelectedText}
-                  onDeleteSelected={handleDeleteSelected}
-                />
+                <span className="text-xs font-semibold text-[#763D8B]">
+                  Base: ${basePrice.toFixed(2)}
+                </span>
               </div>
             </div>
+
+            {/* Selector to switch reference base product if available */}
+            {allProducts.length > 1 && (
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <label className="text-[11px] font-semibold text-stone-600 shrink-0 hidden sm:inline">
+                  Cambiar base:
+                </label>
+                <select
+                  value={currentProduct?.id || ''}
+                  onChange={(e) => {
+                    const found = allProducts.find((p) => p.id === e.target.value);
+                    if (found) {
+                      setSelectedProduct(found);
+                      setSelectedPhotoIndex(0);
+                      onSelectBaseProduct?.(found);
+                    }
+                  }}
+                  className="text-xs p-1.5 sm:p-2 rounded-xl border border-stone-300 bg-white text-stone-800 font-medium w-full sm:w-auto"
+                >
+                  {allProducts.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} (${p.price.toFixed(2)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </section>
 
-          {/* ========================================================================= */}
-          {/* 6. INFORMACIÓN DEL PEDIDO / RESUMEN EN TIEMPO REAL                        */}
-          {/* ========================================================================= */}
-          <section className="bg-white rounded-2xl p-5 sm:p-6 border border-[#E8DED7] shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+          {/* STUDIO MAIN WORKSPACE: Desktop shows side-by-side, Mobile/Tablet shows active tab */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            
+            {/* LEFT COLUMN: INTERACTIVE CANVAS (Always visible on desktop; shown on mobile if mobileStudioTab === 'canvas') */}
+            <div className={`lg:col-span-7 flex flex-col gap-2.5 ${mobileStudioTab !== 'canvas' ? 'hidden lg:flex' : 'flex'}`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-[#763D8B] font-bold uppercase tracking-wider block">
+                    Lienzo Interactivo 2D
+                  </span>
+                  <h4 className="font-serif text-base sm:text-lg font-bold text-[#2E2421]">
+                    Editor Visual de Composición
+                  </h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleClearCanvas}
+                    className="text-xs text-stone-500 hover:text-rose-600 font-medium cursor-pointer"
+                  >
+                    Limpiar lienzo
+                  </button>
+                  {/* Quick button to open elements on mobile */}
+                  <button
+                    type="button"
+                    onClick={() => setMobileStudioTab('elements')}
+                    className="lg:hidden text-xs font-semibold px-2.5 py-1 bg-[#763D8B]/10 text-[#763D8B] rounded-lg cursor-pointer"
+                  >
+                    + Agregar
+                  </button>
+                </div>
+              </div>
+
+              <InteractiveArrangementCanvas
+                elements={elements}
+                texts={texts}
+                selectedId={selectedId}
+                onSelectId={setSelectedId}
+                onUpdateElements={handleUpdateElements}
+                onUpdateTexts={handleUpdateTexts}
+                onDeleteSelected={handleDeleteSelected}
+                onDuplicateSelected={handleDuplicateSelected}
+                onBringToFront={handleBringToFront}
+                onSendToBack={handleSendToBack}
+                onUndo={handleUndo}
+                onRedo={handleRedo}
+                canUndo={history.length > 0}
+                canRedo={redoStack.length > 0}
+                referenceImageUrl={currentReferencePhoto}
+                canvasRef={canvasRef}
+              />
+            </div>
+
+            {/* RIGHT COLUMN: ELEMENTS CATALOG PANEL (Always visible on desktop; shown on mobile if mobileStudioTab === 'elements') */}
+            <div className={`lg:col-span-5 flex flex-col gap-3 ${mobileStudioTab !== 'elements' ? 'hidden lg:flex' : 'flex'}`}>
+              <div className="flex items-center justify-between lg:hidden mb-1">
+                <span className="text-xs font-bold text-stone-800">Catálogo de Accesorios y Textos</span>
+                <button
+                  type="button"
+                  onClick={() => setMobileStudioTab('canvas')}
+                  className="text-xs font-semibold px-2.5 py-1 bg-[#763D8B] text-white rounded-lg cursor-pointer"
+                >
+                  Ver en Lienzo →
+                </button>
+              </div>
+
+              <CustomizerElementPanel
+                elementsList={catalogElements}
+                selectedId={selectedId}
+                placedElements={elements}
+                placedTexts={texts}
+                onAddElement={handleAddElement}
+                onAddText={handleAddText}
+                onUpdateSelectedColor={handleUpdateSelectedColor}
+                onUpdateSelectedText={handleUpdateSelectedText}
+                onDeleteSelected={handleDeleteSelected}
+              />
+            </div>
+          </div>
+
+          {/* SUMMARY SECTION: Always visible on desktop; shown on mobile if mobileStudioTab === 'summary' */}
+          <section className={`bg-white rounded-2xl p-4 sm:p-5 border border-[#E8DED7] shadow-xs space-y-3 ${mobileStudioTab !== 'summary' ? 'hidden lg:block' : 'block'}`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-2.5">
               <div>
                 <span className="text-[10px] text-[#763D8B] font-bold uppercase tracking-wider block">
                   Resumen de tu Diseño
                 </span>
-                <h4 className="font-serif text-lg font-bold text-stone-900">
+                <h4 className="font-serif text-base sm:text-lg font-bold text-stone-900">
                   Detalles del Arreglo Personalizado
                 </h4>
               </div>
 
               <div className="sm:text-right">
                 <span className="text-[11px] text-stone-500 block">Total con tu personalización:</span>
-                <span className="text-2xl sm:text-3xl font-extrabold text-[#763D8B]">
+                <span className="text-xl sm:text-2xl font-extrabold text-[#763D8B]">
                   ${totalPrice.toFixed(2)}
                 </span>
               </div>
             </div>
 
-            {/* Elements list summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div className="p-3 bg-[#FAF7F4] rounded-xl border border-stone-200/80">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-2.5 bg-[#FAF7F4] rounded-xl border border-stone-200/80">
                 <span className="font-bold text-stone-800 block mb-1">Producto Base:</span>
                 <span className="text-stone-600 block">{currentProduct?.name || 'Arreglo Especial'}</span>
                 <span className="font-bold text-stone-900 mt-1 block">${basePrice.toFixed(2)}</span>
               </div>
 
-              <div className="p-3 bg-[#FAF7F4] rounded-xl border border-stone-200/80">
+              <div className="p-2.5 bg-[#FAF7F4] rounded-xl border border-stone-200/80">
                 <span className="font-bold text-stone-800 block mb-1">
                   Elementos en Lienzo ({elements.length}):
                 </span>
@@ -670,7 +663,7 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
                 </span>
               </div>
 
-              <div className="p-3 bg-[#FAF7F4] rounded-xl border border-stone-200/80">
+              <div className="p-2.5 bg-[#FAF7F4] rounded-xl border border-stone-200/80">
                 <span className="font-bold text-stone-800 block mb-1">
                   Dedicatoria en Lienzo:
                 </span>
@@ -688,11 +681,10 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
               </div>
             </div>
 
-            {/* Trust guarantees bar */}
-            <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between text-[11px] text-[#7A6B63] font-light gap-2">
+            <div className="pt-2 border-t border-stone-100 flex flex-wrap items-center justify-between text-[11px] text-[#7A6B63] font-light gap-2">
               <span className="flex items-center gap-1.5">
                 <Truck className="w-3.5 h-3.5 text-[#763D8B]" />
-                <span>Despacho con embalaje seguro en Ciudad de Panamá</span>
+                <span>Despacho con embalaje seguro en toda la Provincia de Colón</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-[#763D8B]" />
@@ -702,22 +694,20 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
           </section>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 7. BOTÓN FINAL: CONTINUAR CON MI PEDIDO                                  */}
-        {/* ========================================================================= */}
-        <div className="p-4 sm:p-6 bg-white border-t border-[#EBE2DB] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="text-xs text-stone-500 block">Total con tu personalización:</span>
-            <span className="text-2xl sm:text-3xl font-extrabold text-[#2E2421]">
+        {/* STICKY FOOTER: ALWAYS VISIBLE AND ACCESSIBLE WITHOUT OVERFLOW */}
+        <div className="p-3.5 sm:p-5 bg-white border-t border-[#EBE2DB] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="text-center sm:text-left">
+            <span className="text-[11px] text-stone-500 block leading-tight">Total con tu personalización:</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-[#2E2421]">
               ${totalPrice.toFixed(2)}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               type="button"
               onClick={onClose}
-              className="btn-spring-action px-5 py-3 rounded-xl border border-stone-300 text-stone-700 hover:bg-stone-50 font-semibold text-xs cursor-pointer"
+              className="btn-spring-action px-4 py-2.5 rounded-xl border border-stone-300 text-stone-700 hover:bg-stone-50 font-semibold text-xs cursor-pointer"
             >
               Cancelar
             </button>
@@ -725,7 +715,7 @@ export const ArrangementCustomizerModal: React.FC<ArrangementCustomizerModalProp
             <button
               type="button"
               onClick={handleContinueToOrder}
-              className="btn-cta-emil flex-1 sm:flex-initial py-3.5 px-8 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              className="btn-cta-emil flex-1 sm:flex-initial py-3 px-6 sm:px-8 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>CONTINUAR CON MI PEDIDO</span>
               <ArrowRight className="w-4 h-4 text-[#F6E3BA]" />

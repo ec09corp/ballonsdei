@@ -12,7 +12,10 @@ import {
   Clock, 
   Send, 
   AlertCircle,
-  Trash2
+  Trash2,
+  ExternalLink,
+  MessageCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Order, OrderStatus } from '../../types/database';
 import { orderService } from '../../services/orderService';
@@ -146,9 +149,87 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, onRefreshOrder
         </div>
       </div>
 
-      {/* Orders Table */}
+      {/* Orders Display: Mobile Cards + Desktop Table */}
       <div className="bg-white rounded-2xl border border-[#EDE5DF] shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Touch-friendly order cards */}
+        <div className="block md:hidden divide-y divide-[#F2ECE6]">
+          {filteredOrders.length === 0 ? (
+            <div className="py-12 text-center text-xs text-[#8A796F]">
+              No se encontraron pedidos con los filtros seleccionados.
+            </div>
+          ) : (
+            filteredOrders.map((ord) => (
+              <div key={ord.id} className="p-3.5 space-y-2.5 hover:bg-[#FAF8F5]">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="font-semibold text-xs text-[#2E2421] block">
+                      Pedido #{ord.order_number}
+                    </span>
+                    <span className="font-medium text-xs text-[#423530]">
+                      {ord.customer_name}
+                    </span>
+                    <span className="text-[10px] text-[#8A796F] block">
+                      Tel: {ord.customer_phone}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-sm text-[#8D5844] block">
+                      ${ord.total.toFixed(2)}
+                    </span>
+                    <span className="text-[10px] text-[#8A796F]">
+                      {ord.delivery_date || 'Sin fecha'}
+                    </span>
+                    {ord.receipt_url && (
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-purple-50 text-[#763D8B] text-[9px] font-semibold rounded mt-0.5 block border border-purple-200">
+                        📸 Comprobante
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#F7F3EF]">
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-[10px] text-[#8A796F]">Estado:</label>
+                    <select
+                      value={ord.status}
+                      disabled={isUpdating}
+                      onChange={(e) =>
+                        handleStatusChange(ord.id, e.target.value as OrderStatus)
+                      }
+                      className="text-[11px] py-1 px-2 rounded-lg border border-[#D5C2B8] bg-white font-medium text-[#2E2421] cursor-pointer"
+                    >
+                      {statuses.map((st) => (
+                        <option key={st.key} value={st.key}>
+                          {st.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setSelectedOrder(ord)}
+                      className="p-1.5 text-[#8D5844] bg-[#FAF8F5] hover:bg-[#F2ECE6] border border-[#E3D7CE] rounded-lg transition-colors"
+                      title="Ver detalle del pedido"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteOrder(ord.id, ord.order_number)}
+                      className="p-1.5 text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors"
+                      title="Eliminar pedido"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-[#FAF8F5] border-b border-[#EBE2DB] text-[#7A6B63] uppercase tracking-wider text-[10px]">
@@ -158,6 +239,7 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, onRefreshOrder
                 <th className="py-3 px-4">Artículos</th>
                 <th className="py-3 px-4">Total</th>
                 <th className="py-3 px-4">Método Pago</th>
+                <th className="py-3 px-4">Comprobante</th>
                 <th className="py-3 px-4">Estado</th>
                 <th className="py-3 px-4 text-right">Acciones</th>
               </tr>
@@ -165,7 +247,7 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, onRefreshOrder
             <tbody className="divide-y divide-[#F2ECE6]">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-xs text-[#8A796F]">
+                  <td colSpan={9} className="py-12 text-center text-xs text-[#8A796F]">
                     No se encontraron pedidos con los filtros seleccionados.
                   </td>
                 </tr>
@@ -190,6 +272,21 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, onRefreshOrder
                     </td>
                     <td className="py-3.5 px-4 text-[#5C4D46]">
                       {ord.payment_method}
+                    </td>
+                    <td className="py-3.5 px-4">
+                      {ord.receipt_url ? (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedOrder(ord)}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-[#763D8B] rounded text-[11px] font-semibold transition-colors cursor-pointer"
+                          title="Ver captura de comprobante"
+                        >
+                          <ImageIcon className="w-3.5 h-3.5" />
+                          <span>Ver Captura</span>
+                        </button>
+                      ) : (
+                        <span className="text-[10px] text-[#A6978E] italic">Sin captura</span>
+                      )}
                     </td>
                     <td className="py-3.5 px-4">
                       <select
@@ -290,30 +387,58 @@ export const AdminOrders: React.FC<AdminOrdersProps> = ({ orders, onRefreshOrder
                   </div>
                 )}
 
-                {/* Yappy Receipt Proof in Admin */}
+                {/* Receipt Proof in Admin */}
                 {(selectedOrder.receipt_url || selectedOrder.receipt_ref) && (
-                  <div className="pt-2 border-t border-[#EBE2DB] space-y-2">
+                  <div className="pt-3 border-t border-[#EBE2DB] space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[#8A796F] block font-medium">Comprobante de Pago Yappy:</span>
+                      <span className="text-[#8A796F] block font-medium">
+                        Comprobante de Pago ({selectedOrder.payment_method}):
+                      </span>
                       {selectedOrder.receipt_ref && (
-                        <span className="px-2 py-0.5 bg-purple-50 text-purple-700 text-xs font-bold rounded">
+                        <span className="px-2 py-0.5 bg-purple-50 text-purple-700 text-xs font-bold rounded border border-purple-200">
                           Ref: #{selectedOrder.receipt_ref}
                         </span>
                       )}
                     </div>
                     {selectedOrder.receipt_url && (
-                      <div className="rounded-lg overflow-hidden border border-[#D5C2B8] max-h-56 bg-black/5 flex items-center justify-center p-1">
-                        <a href={selectedOrder.receipt_url} target="_blank" rel="noopener noreferrer" title="Clic para ampliar comprobante">
+                      <div className="space-y-2">
+                        <div className="rounded-xl overflow-hidden border border-[#D5C2B8] max-h-64 bg-black/5 flex items-center justify-center p-2">
                           <img
                             src={selectedOrder.receipt_url}
-                            alt="Comprobante Yappy"
-                            className="max-h-52 w-auto object-contain rounded hover:opacity-95 transition-opacity"
+                            alt={`Comprobante ${selectedOrder.payment_method}`}
+                            className="max-h-60 w-auto object-contain rounded shadow-xs"
                           />
-                        </a>
+                        </div>
+                        <div className="flex items-center justify-between text-[11px]">
+                          <a
+                            href={selectedOrder.receipt_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-[#763D8B] hover:underline font-semibold"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Abrir captura en tamaño completo</span>
+                          </a>
+                        </div>
                       </div>
                     )}
                   </div>
                 )}
+
+                {/* Direct WhatsApp Message to Customer */}
+                <div className="pt-2 border-t border-[#EBE2DB]">
+                  <a
+                    href={`https://wa.me/${(selectedOrder.customer_phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                      `Hola ${selectedOrder.customer_name}, te saludamos de BALLONSDEI con respecto a tu pedido #${selectedOrder.order_number} (${selectedOrder.delivery_type === 'delivery' ? 'entrega en Colón' : 'retiro en tienda'}). ¡Estamos preparando tu orden!`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#1EBE5D] text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Contactar al Cliente por WhatsApp ({selectedOrder.customer_phone})</span>
+                  </a>
+                </div>
               </div>
 
               {/* Items List */}

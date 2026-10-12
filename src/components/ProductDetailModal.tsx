@@ -122,9 +122,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const isLowStock = product.stock > 0 && product.stock <= product.minimum_stock;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/60 backdrop-blur-sm overflow-hidden animate-fade-in">
       <div 
-        className="relative w-full max-w-5xl bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col max-h-[92vh] animate-modal-enter"
+        className="relative w-full max-w-5xl bg-[#FAF8F5] rounded-2xl shadow-2xl overflow-hidden my-auto border border-[#E8DED7] flex flex-col h-[94dvh] max-h-[94dvh] animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
@@ -700,7 +700,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <div className="pt-4 border-t border-[#EFE8E2] flex items-center justify-between text-[11px] text-[#7A6B63] font-light">
                   <span className="flex items-center gap-1.5">
                     <Truck className="w-3.5 h-3.5 text-[#763D8B]" />
-                    Despacho en ciudad de Panamá
+                    Despacho en toda la Provincia de Colón
                   </span>
                   <span className="flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-[#763D8B]" />

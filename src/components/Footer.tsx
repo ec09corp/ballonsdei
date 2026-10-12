@@ -165,7 +165,7 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Business Hours */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-semibold uppercase tracking-widest text-[#F2E8F0]">
-              Atelier & Horario
+              Boutique & Horario
             </h4>
             <div className="space-y-2 text-xs font-light text-[#B5A1AF]">
               <p className="flex items-start gap-2">
@@ -206,14 +206,13 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
-                <span className="text-[#836D7D] cursor-not-allowed">
-                  Términos y Condiciones
-                </span>
-              </li>
-              <li>
-                <span className="text-[#836D7D] cursor-not-allowed">
-                  Política de Privacidad y Devoluciones
-                </span>
+                <button
+                  onClick={onOpenAdmin}
+                  className="hover:text-[#F5EEF3] transition-colors flex items-center gap-1.5 text-[#C19B65] font-medium cursor-pointer"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Panel Administrador</span>
+                </button>
               </li>
             </ul>
           </div>

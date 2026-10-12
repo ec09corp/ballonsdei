@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Gift, 
+  ShoppingCart, 
   Search, 
   Menu, 
   X, 
   Phone, 
   MapPin, 
   ChevronRight,
-  MessageCircle
+  MessageCircle,
+  ShieldCheck
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { Category, StoreSettings } from '../types/database';
@@ -45,19 +46,42 @@ export const Header: React.FC<HeaderProps> = ({
 
   const logoTapTrackerRef = useRef<{ count: number; lastTime: number }>({ count: 0, lastTime: 0 });
   const logoNavTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [tapCounter, setTapCounter] = useState<number>(0);
+  const resetTapFeedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleLogoTap = (e: React.MouseEvent | React.TouchEvent) => {
     const now = Date.now();
-    // Allow up to 750ms between consecutive taps
-    if (now - logoTapTrackerRef.current.lastTime < 750) {
+    // Allow up to 1100ms between consecutive taps for mobile screens
+    if (now - logoTapTrackerRef.current.lastTime < 1100) {
       logoTapTrackerRef.current.count += 1;
     } else {
       logoTapTrackerRef.current.count = 1;
     }
     logoTapTrackerRef.current.lastTime = now;
 
+    const currentTaps = logoTapTrackerRef.current.count;
+    setTapCounter(currentTaps);
+
+    if (resetTapFeedbackTimerRef.current) {
+      clearTimeout(resetTapFeedbackTimerRef.current);
+    }
+    resetTapFeedbackTimerRef.current = setTimeout(() => {
+      setTapCounter(0);
+    }, 1500);
+
+    // Haptic feedback on tap
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try {
+        if (currentTaps >= 5) {
+          navigator.vibrate([80, 50, 100]);
+        } else if (currentTaps >= 2) {
+          navigator.vibrate([35]);
+        }
+      } catch {}
+    }
+
     // Trigger Admin Mode on 5 consecutive taps
-    if (logoTapTrackerRef.current.count >= 5) {
+    if (currentTaps >= 5) {
       e.preventDefault();
       e.stopPropagation();
       if (logoNavTimerRef.current) {
@@ -65,15 +89,10 @@ export const Header: React.FC<HeaderProps> = ({
         logoNavTimerRef.current = null;
       }
       logoTapTrackerRef.current.count = 0;
+      setTapCounter(0);
       setMobileMenuOpen(false);
 
-      // Haptic feedback on mobile if supported
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        try {
-          navigator.vibrate([60, 50, 60]);
-        } catch {}
-      }
-
+      window.location.hash = '#admin';
       onOpenAdmin();
       return;
     }
@@ -87,7 +106,8 @@ export const Header: React.FC<HeaderProps> = ({
         handleNavClick('catalogo', 'all');
       }
       logoTapTrackerRef.current.count = 0;
-    }, 450);
+      setTapCounter(0);
+    }, 600);
   };
 
   const cleanPhone = (settings.whatsapp_number || '+50764324750').replace(/[^0-9]/g, '');
@@ -121,7 +141,9 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="text-[11px] sm:text-xs font-light text-stone-300 mx-auto sm:mx-0 flex items-center gap-2">
             <span className="text-[#C5A059]">✦</span>
-            <span>Alta Floristería & Globos de Autor en Panamá · Pedidos VIP: </span>
+            <span className="font-semibold text-white tracking-wider">BALLONSDEI</span>
+            <span className="text-[#C5A059]">·</span>
+            <span>Obsequios Personalizados & Arreglos Florales · Colón · VIP: </span>
             <a
               href={`https://wa.me/${cleanPhone}`}
               target="_blank"
@@ -138,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
             <span className="flex items-center gap-1.5">
               <MapPin className="w-3 h-3 text-[#C5A059]" />
-              Ciudad de Panamá
+              Ciudad de Colón
             </span>
           </div>
         </div>
@@ -159,40 +181,43 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Brand Logo */}
-          <div className="flex-1 lg:flex-none text-center lg:text-left">
-            <button
-              type="button"
-              onClick={handleLogoTap}
-              className="inline-flex items-center gap-2.5 group focus:outline-none text-left cursor-pointer select-none"
-              aria-label="Ir al catálogo de la tienda"
-            >
-              {settings.logo_url ? (
-                <div className="flex items-center gap-2.5">
-                  <img
-                    src={settings.logo_url}
-                    alt={settings.store_name || 'Ballonsdei'}
-                    className="h-10 sm:h-12 w-auto max-w-[150px] object-contain rounded-md pointer-events-none"
-                  />
-                  <div className="hidden sm:flex flex-col">
-                    <span className="font-serif text-xl sm:text-2xl tracking-[0.14em] font-medium text-stone-900 group-hover:text-[#763D8B] transition-colors uppercase">
+          <div className="flex-1 lg:flex-none text-center lg:text-left relative">
+            <div className="inline-block relative">
+              <button
+                type="button"
+                onClick={handleLogoTap}
+                style={{ touchAction: 'manipulation' }}
+                className="inline-flex items-center gap-2.5 group focus:outline-none text-left cursor-pointer select-none active:scale-[0.98] transition-transform"
+                aria-label="Ir al catálogo de la tienda"
+              >
+                {settings.logo_url ? (
+                  <div className="flex items-center gap-2 sm:gap-2.5">
+                    <img
+                      src={settings.logo_url}
+                      alt={settings.store_name || 'Ballonsdei'}
+                      className="h-9 sm:h-12 w-auto max-w-[120px] sm:max-w-[150px] object-contain rounded-md pointer-events-none"
+                    />
+                    <div className="flex flex-col text-left">
+                      <span className="font-serif text-base sm:text-2xl tracking-[0.14em] font-medium text-stone-900 group-hover:text-[#763D8B] transition-colors uppercase leading-tight">
+                        {settings.store_name || 'Ballonsdei'}
+                      </span>
+                      <span className="text-[8px] sm:text-[9px] tracking-[0.22em] text-[#763D8B] font-semibold uppercase">
+                        Boutique de Autor
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col text-left">
+                    <span className="font-serif text-xl sm:text-3xl tracking-[0.18em] font-medium text-stone-900 group-hover:text-[#763D8B] transition-colors uppercase">
                       {settings.store_name || 'Ballonsdei'}
                     </span>
-                    <span className="text-[9px] tracking-[0.25em] text-stone-500 uppercase font-light">
-                      Boutique & Eventos
+                    <span className="text-[9px] tracking-[0.3em] text-[#763D8B] uppercase font-semibold -mt-0.5">
+                      Boutique de Autor
                     </span>
                   </div>
-                </div>
-              ) : (
-                <div className="flex flex-col">
-                  <span className="font-serif text-2xl sm:text-3xl tracking-[0.18em] font-medium text-stone-900 group-hover:text-[#763D8B] transition-colors uppercase">
-                    {settings.store_name || 'Ballonsdei'}
-                  </span>
-                  <span className="text-[9px] tracking-[0.3em] text-stone-500 uppercase font-light -mt-0.5">
-                    Boutique & Globos
-                  </span>
-                </div>
-              )}
-            </button>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Desktop Navigation Links */}
@@ -252,14 +277,14 @@ export const Header: React.FC<HeaderProps> = ({
               <Search className="w-5 h-5" />
             </button>
 
-            {/* Shopping Cart Button with boutique Gift icon */}
+            {/* Shopping Cart Button with boutique ShoppingCart icon */}
             <button
               onClick={openCart}
               className="btn-icon-tactile relative p-2 text-stone-700 hover:text-[#763D8B] hover:bg-stone-100 rounded-full cursor-pointer"
-              title="Ver regalos en el carrito"
-              aria-label="Carrito de regalos"
+              title="Ver carrito de compras"
+              aria-label="Carrito de compras"
             >
-              <Gift className="w-5 h-5" />
+              <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#763D8B] text-white text-[11px] font-semibold w-5 h-5 rounded-full flex items-center justify-center shadow-xs animate-scale">
                   {itemCount}
@@ -273,17 +298,17 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex">
-          <div className="w-4/5 max-w-sm bg-white h-full shadow-2xl flex flex-col p-6 overflow-y-auto">
+          <div className="w-4/5 max-w-sm bg-white h-[100dvh] max-h-[100dvh] shadow-2xl flex flex-col p-5 sm:p-6 overflow-y-auto">
             <div className="flex items-center justify-between pb-5 border-b border-stone-200">
               <div
                 onClick={handleLogoTap}
                 className="select-none cursor-pointer active:opacity-75 transition-opacity"
               >
-                <span className="font-serif text-xl tracking-[0.15em] font-medium text-stone-900 block">
-                  {settings.store_name}
+                <span className="font-serif text-xl tracking-[0.15em] font-medium text-stone-900 block uppercase">
+                  {settings.store_name || 'Ballonsdei'}
                 </span>
-                <span className="text-[9px] tracking-[0.25em] text-stone-500 uppercase">
-                  Boutique
+                <span className="text-[9px] tracking-[0.25em] text-[#763D8B] font-semibold uppercase">
+                  Boutique Ballonsdei · Colón
                 </span>
               </div>
               <button
@@ -332,6 +357,25 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <ChevronRight className="w-4 h-4 text-emerald-500" />
               </a>
+
+              {/* Mobile Direct Access to Admin Panel */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  window.location.hash = '#admin';
+                  onOpenAdmin();
+                }}
+                className="w-full flex items-center justify-between px-3 py-2.5 text-left text-xs font-medium text-stone-700 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors mt-3 cursor-pointer border border-stone-200"
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#8D5844]" />
+                  <span>Panel Administrador (Admin)</span>
+                </div>
+                <span className="text-[10px] bg-[#8D5844] text-white px-2 py-0.5 rounded-full font-semibold">
+                  Acceder
+                </span>
+              </button>
             </div>
 
             <div className="mt-auto pt-6 border-t border-stone-200 space-y-3 text-xs text-stone-500">

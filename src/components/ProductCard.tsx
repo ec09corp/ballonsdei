@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, Gift, Calendar, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Eye, ShoppingCart, Calendar, Sparkles } from 'lucide-react';
 import { Product } from '../types/database';
 import { useCart } from '../context/CartContext';
 
@@ -104,65 +104,47 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Price & Action Strip */}
-        <div className="mt-4 pt-3 border-t border-[#F2ECE6] flex items-center justify-between gap-2">
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-serif text-xl sm:text-2xl font-light text-[#241A23]">
+        <div className="mt-3.5 pt-3 border-t border-[#F2ECE6] flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-baseline gap-1.5 min-w-0">
+            <span className="font-serif text-xl sm:text-2xl font-light text-[#241A23] truncate">
               ${displayPrice.toFixed(2)}
             </span>
             {isRental && (
-              <span className="text-[10px] text-[#6E5A69] font-light uppercase tracking-wider">/ día</span>
+              <span className="text-[10px] text-[#6E5A69] font-light uppercase tracking-wider shrink-0">/ día</span>
             )}
             {product.previous_price && (
-              <span className="text-xs text-[#8A796F] line-through font-light ml-1">
+              <span className="text-xs text-[#8A796F] line-through font-light ml-0.5 shrink-0">
                 ${product.previous_price.toFixed(2)}
               </span>
             )}
           </div>
 
-          {/* Emil Kowalski Tactile Action Triggers */}
-          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-            {/* Customization Action: available for variable gifts AND as an option to modify fixed gifts */}
-            {onCustomizeProduct && !isRental && (
-              <button
-                type="button"
-                onClick={() => onCustomizeProduct(product)}
-                aria-label={isVariableGift ? `Personalizar ${product.name} en el estudio visual` : `Modificar ${product.name} a tu gusto`}
-                className={`btn-spring-action text-[11px] font-semibold px-2.5 sm:px-3 py-1.5 rounded-full cursor-pointer flex items-center gap-1 group/btn ${
-                  isVariableGift 
-                    ? 'text-white bg-[#763D8B] hover:bg-[#602F72] shadow-xs hover:shadow-md hover:shadow-[#763D8B]/25' 
-                    : 'text-[#763D8B] hover:text-[#52255E] bg-[#763D8B]/10 hover:bg-[#763D8B]/18 border border-[#763D8B]/25'
-                }`}
-                title={isVariableGift ? "Personalizar este regalo a tu gusto" : "Modificar este diseño a tu gusto (cambiar globos, frase o detalles)"}
-              >
-                <SlidersHorizontal className="w-3 h-3 text-current transition-transform duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/btn:rotate-45" />
-                <span className="hidden xs:inline">{isVariableGift ? 'Personalizar' : 'Modificar'}</span>
-              </button>
-            )}
-
+          {/* Action Triggers */}
+          <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
             {isRental ? (
               <button
                 type="button"
                 onClick={() => onViewProduct(product)}
                 aria-label={`Reservar ${product.name}`}
-                className="btn-spring-action text-xs font-semibold text-[#374D40] hover:text-[#1F2C24] bg-[#435C4E]/10 hover:bg-[#435C4E]/20 px-3.5 py-1.5 rounded-full flex items-center gap-1 cursor-pointer"
+                className="btn-spring-action text-xs font-semibold text-[#374D40] hover:text-[#1F2C24] bg-[#435C4E]/10 hover:bg-[#435C4E]/20 px-3 py-1.5 rounded-full flex items-center gap-1 cursor-pointer shrink-0"
               >
                 <Calendar className="w-3 h-3" />
                 <span>Reservar</span>
               </button>
             ) : isOutOfStock ? (
-              <span className="text-xs text-[#8C3A3A] font-medium tracking-wide">Agotado</span>
-            ) : !isVariableGift ? (
+              <span className="text-xs text-[#8C3A3A] font-medium tracking-wide shrink-0">Agotado</span>
+            ) : (
               <button
                 type="button"
                 onClick={() => addItem(product, 1)}
-                aria-label={`Añadir ${product.name} tal cual al carrito`}
-                className="btn-spring-action text-xs font-semibold text-[#241A23] hover:text-[#763D8B] bg-[#FAF4F7] hover:bg-[#F2E5EF] border border-[#E4D7E0] hover:border-[#763D8B]/40 px-3 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-sm"
-                title="Añadir diseño fijo tal cual al carrito"
+                aria-label={`Añadir ${product.name} al carrito`}
+                className="btn-spring-action text-xs font-semibold text-white bg-[#763D8B] hover:bg-[#602F72] shadow-xs hover:shadow-md hover:shadow-[#763D8B]/20 px-3 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer shrink-0"
+                title="Añadir producto al carrito de compras"
               >
-                <Gift className="w-3.5 h-3.5 text-[#763D8B]" />
+                <ShoppingCart className="w-3.5 h-3.5 text-white" />
                 <span>Añadir</span>
               </button>
-            ) : null}
+            )}
           </div>
         </div>
       </div>

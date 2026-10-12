@@ -15,7 +15,8 @@ import {
   Loader2,
   FolderOpen,
   Copy,
-  ShieldAlert
+  ShieldAlert,
+  RefreshCw
 } from 'lucide-react';
 import { Product, Category, GiftType, ProductType } from '../../types/database';
 import { productService } from '../../services/productService';
@@ -81,11 +82,31 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
   const [permissionNotice, setPermissionNotice] = useState<boolean>(false);
   const [copiedSqlFix, setCopiedSqlFix] = useState<boolean>(false);
 
+  const [isSyncingSupabase, setIsSyncingSupabase] = useState<boolean>(false);
+
   const handleCopyPermissionFix = () => {
     const script = getSupabasePermissionFixScript();
     navigator.clipboard?.writeText(script);
     setCopiedSqlFix(true);
     setTimeout(() => setCopiedSqlFix(false), 3000);
+  };
+
+  const handleSyncWithSupabase = async () => {
+    setIsSyncingSupabase(true);
+    setErrorMsg(null);
+    try {
+      const res = await productService.syncAllProductsToSupabase();
+      if (res.success) {
+        setSuccessMsg(`¡Sincronización exitosa! ${res.syncedCount} producto(s) guardados y sincronizados en Supabase.`);
+        onRefresh();
+      } else {
+        setErrorMsg(res.error || 'No se pudo sincronizar con Supabase. Verifica tus credenciales en Ajustes > Supabase.');
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Error al sincronizar con Supabase.');
+    } finally {
+      setIsSyncingSupabase(false);
+    }
   };
 
   const filteredProducts = products.filter((p) => {
@@ -329,6 +350,17 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
           </div>
 
           <button
+            type="button"
+            onClick={handleSyncWithSupabase}
+            disabled={isSyncingSupabase}
+            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-stone-50 border border-[#D5C2B8] text-[#423530] rounded-lg text-xs font-medium shadow-2xs transition-colors cursor-pointer disabled:opacity-50"
+            title="Sincronizar todos los productos con tu base de datos Supabase"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#763D8B] ${isSyncingSupabase ? 'animate-spin' : ''}`} />
+            <span>{isSyncingSupabase ? 'Sincronizando...' : 'Sincronizar Supabase'}</span>
+          </button>
+
+          <button
             onClick={openCreateModal}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#763D8B] hover:bg-[#602F72] text-white rounded-lg text-xs font-semibold uppercase tracking-wider shadow-sm transition-colors cursor-pointer self-start sm:self-auto"
           >
@@ -408,9 +440,76 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
         </div>
       </div>
 
-      {/* Products Table */}
+      {/* Products Display: Responsive Cards on Mobile + Table on Desktop */}
       <div className="bg-white rounded-2xl border border-[#EDE5DF] shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Touch-friendly cards */}
+        <div className="block md:hidden divide-y divide-[#F2ECE6]">
+          {filteredProducts.map((p) => {
+            const mainImg = p.images?.[0]?.image_url || '';
+            const imgCount = p.images?.length || 0;
+            return (
+              <div key={p.id} className="p-3.5 flex items-center justify-between gap-3 hover:bg-[#FAF8F5]">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-14 h-14 rounded-xl bg-[#FAF8F5] overflow-hidden border border-[#EDE5DF] shrink-0">
+                    {mainImg ? (
+                      <img src={mainImg} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[#B3A298]">
+                        <ImageIcon className="w-5 h-5" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-medium text-[#2E2421] text-xs truncate">{p.name}</h4>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="font-semibold text-xs text-[#8D5844]">
+                        ${(p.available_for_rental && p.rental_price ? p.rental_price : p.price).toFixed(2)}
+                      </span>
+                      <span className="text-[10px] text-[#8A796F]">
+                        • {p.stock} en stock
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {p.gift_type === 'fixed' && (
+                        <span className="px-1.5 py-0.2 rounded bg-orange-50 text-orange-700 text-[9px] font-medium">
+                          Fijo
+                        </span>
+                      )}
+                      {p.gift_type === 'variable' && (
+                        <span className="px-1.5 py-0.2 rounded bg-amber-50 text-amber-700 text-[9px] font-medium">
+                          A tu Gusto
+                        </span>
+                      )}
+                      <span className={`px-1.5 py-0.2 rounded text-[9px] font-medium ${p.active ? 'bg-emerald-50 text-emerald-700' : 'bg-stone-100 text-stone-500'}`}>
+                        {p.active ? 'Activo' : 'Oculto'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    onClick={() => openEditModal(p)}
+                    className="p-2 text-[#8D5844] bg-[#FAF8F5] hover:bg-[#F2ECE6] border border-[#E3D7CE] rounded-lg transition-colors cursor-pointer"
+                    aria-label="Editar producto"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setProductToDelete({ id: p.id, name: p.name })}
+                    className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors cursor-pointer"
+                    aria-label="Eliminar producto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop View: Full Data Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="bg-[#FAF8F5] border-b border-[#EBE2DB] text-[#7A6B63] uppercase tracking-wider text-[10px]">
@@ -522,32 +621,33 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
 
       {/* Create / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs overflow-y-auto">
-          <div className="relative w-full max-w-4xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#EDE5DF] overflow-hidden flex flex-col max-h-[92vh]">
-            <div className="p-5 border-b border-[#EBE2DB] bg-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/60 backdrop-blur-xs overflow-hidden">
+          <div className="relative w-full max-w-4xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#EDE5DF] overflow-hidden flex flex-col h-[94dvh] max-h-[94dvh]">
+            <div className="p-4 sm:p-5 border-b border-[#EBE2DB] bg-white flex items-center justify-between shrink-0">
               <div>
                 <span className="text-[10px] text-[#8D5844] uppercase font-bold tracking-wider">
                   Administrador de Inventario
                 </span>
-                <h3 className="font-serif text-xl font-medium text-[#2E2421]">
+                <h3 className="font-serif text-lg sm:text-xl font-medium text-[#2E2421]">
                   {editingProduct ? `Editar: ${editingProduct.name}` : 'Crear Nuevo Producto'}
                 </h3>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-[#7A6B63] hover:text-[#2E2421] hover:bg-[#F2ECE6] rounded-full"
+                className="p-1.5 text-[#7A6B63] hover:text-[#2E2421] hover:bg-[#F2ECE6] rounded-full cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
-              {errorMsg && (
-                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
+            <form onSubmit={handleSaveProduct} className="flex flex-col flex-1 overflow-hidden text-xs">
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1">
+                {errorMsg && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
 
               {/* 4 IMAGES UPLOAD SECTION */}
               <div className="p-4 bg-white rounded-xl border border-[#EDE5DF] space-y-3">
@@ -888,25 +988,26 @@ export const AdminProducts: React.FC<AdminProductsProps> = ({
                   <span>Marcar como Nuevo</span>
                 </label>
               </div>
+            </div>
 
-              {/* Submit Buttons */}
-              <div className="pt-4 border-t border-[#EBE2DB] flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-lg border border-[#D5C2B8] bg-white text-[#423530] hover:bg-[#F2ECE6]"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-6 py-2.5 rounded-lg bg-[#8D5844] hover:bg-[#744533] disabled:bg-[#D5C2B8] text-white font-medium shadow-sm transition-colors cursor-pointer"
-                >
-                  {isSaving ? 'Guardando en Supabase...' : 'Guardar Producto'}
-                </button>
-              </div>
-            </form>
+            {/* Sticky Submit Buttons Footer */}
+            <div className="p-4 border-t border-[#EBE2DB] bg-white flex items-center justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-5 py-2.5 rounded-lg border border-[#D5C2B8] bg-white text-[#423530] hover:bg-[#F2ECE6] cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={isSaving}
+                className="px-6 py-2.5 rounded-lg bg-[#8D5844] hover:bg-[#744533] disabled:bg-[#D5C2B8] text-white font-medium shadow-sm transition-colors cursor-pointer"
+              >
+                {isSaving ? 'Guardando en Supabase...' : 'Guardar Producto'}
+              </button>
+            </div>
+          </form>
           </div>
         </div>
       )}

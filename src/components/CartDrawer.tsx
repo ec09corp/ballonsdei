@@ -1,16 +1,18 @@
 import React from 'react';
-import { X, Trash2, ArrowRight, Gift, Calendar, Sparkles } from 'lucide-react';
+import { X, Trash2, ArrowRight, ShoppingCart, Calendar, SlidersHorizontal, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { StoreSettings } from '../types/database';
 
 interface CartDrawerProps {
   settings: StoreSettings;
   onProceedToCheckout: () => void;
+  onCustomizeItem?: (productId: string) => void;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
   settings,
   onProceedToCheckout,
+  onCustomizeItem,
 }) => {
   const { items, isOpen, closeCart, removeItem, updateQuantity, subtotal, itemCount } = useCart();
 
@@ -24,15 +26,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       >
         {/* Drawer Header */}
         <div className="p-6 border-b border-[#EBE2DB] bg-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Gift className="w-5 h-5 text-[#763D8B]" />
-            <h2 className="font-serif text-xl font-medium text-[#2E2421]">
-              Tu Carrito ({itemCount})
-            </h2>
+          <div className="flex items-center gap-2.5">
+            <ShoppingCart className="w-5 h-5 text-[#763D8B]" />
+            <div>
+              <h2 className="font-serif text-lg sm:text-xl font-medium text-[#2E2421] leading-tight">
+                Tu Carrito ({itemCount})
+              </h2>
+              <span className="text-[10px] tracking-[0.2em] uppercase text-[#763D8B] font-semibold block">
+                BALLONSDEI · COLÓN
+              </span>
+            </div>
           </div>
           <button
             onClick={closeCart}
-            className="p-2 text-[#7A6B63] hover:text-[#2E2421] hover:bg-[#F2ECE6] rounded-full transition-colors"
+            className="p-2 text-[#7A6B63] hover:text-[#2E2421] hover:bg-[#F2ECE6] rounded-full transition-colors cursor-pointer"
             aria-label="Cerrar carrito"
           >
             <X className="w-5 h-5" />
@@ -44,15 +51,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           {items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4 text-[#8C7A70]">
               <div className="w-16 h-16 rounded-full bg-[#EFE8E2] flex items-center justify-center text-[#A89890]">
-                <Gift className="w-8 h-8" />
+                <ShoppingCart className="w-8 h-8" />
               </div>
               <p className="font-serif text-lg text-[#382B26]">Tu carrito está vacío</p>
               <p className="text-xs text-[#8C7A70] max-w-xs font-light">
-                Descubre nuestros arreglos florales, regalos fijos y opciones de alquiler para llenar este momento de magia.
+                Descubre nuestros arreglos florales originales, obsequios personalizados y opciones de alquiler para la provincia de Colón.
               </p>
               <button
                 onClick={closeCart}
-                className="btn-tactile mt-2 px-6 py-2.5 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-medium uppercase tracking-wider rounded-full transition-colors active:scale-[0.97]"
+                className="btn-tactile mt-2 px-6 py-2.5 bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-medium uppercase tracking-wider rounded-full transition-colors active:scale-[0.97] cursor-pointer"
               >
                 Comenzar a Comprar
               </button>
@@ -61,7 +68,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             items.map((item) => (
               <div
                 key={`${item.product_id}-${item.selected_variant || 'default'}`}
-                className="flex gap-4 p-3 bg-white rounded-xl border border-[#EDE5DF] shadow-2xs relative"
+                className="flex gap-4 p-3.5 bg-white rounded-xl border border-[#EDE5DF] shadow-2xs relative"
               >
                 {/* Product Thumbnail */}
                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-[#F5EFEB] shrink-0 border border-[#EAE2DC]">
@@ -83,11 +90,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         {/* Type indicator */}
                         {item.customization ? (
                           <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#763D8B] bg-[#763D8B]/10 px-1.5 py-0.5 rounded-sm uppercase tracking-wider mt-0.5">
-                            🎨 Personalizado a tu Gusto
+                            🎨 Personalizado
                           </span>
                         ) : !item.is_rental ? (
                           <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-[#7D5B28] bg-[#F5EFE6] px-1.5 py-0.5 rounded-sm uppercase tracking-wider mt-0.5 border border-[#D4AF37]/30">
-                            💎 Diseño Fijo Original
+                            ✦ Arreglo Original
                           </span>
                         ) : null}
                       </div>
@@ -101,8 +108,24 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       </button>
                     </div>
 
+                    {/* Option to customize/modify this arrangement right from the cart */}
+                    {!item.is_rental && onCustomizeItem && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeCart();
+                          onCustomizeItem(item.product_id);
+                        }}
+                        className="btn-spring-action mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#763D8B] hover:text-[#52255E] bg-[#FAF4F7] hover:bg-[#F2E5EF] border border-[#763D8B]/25 px-2.5 py-1 rounded-full cursor-pointer"
+                        title="Personalizar colores, globos o frase en el estudio visual"
+                      >
+                        <SlidersHorizontal className="w-3 h-3 text-[#763D8B]" />
+                        <span>Personalizar o cambiar arreglo</span>
+                      </button>
+                    )}
+
                     {item.is_rental && (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-[#556B5C] bg-[#556B5C]/10 px-1.5 py-0.5 rounded-xs mt-0.5">
+                      <span className="inline-flex items-center gap-1 text-[10px] text-[#556B5C] bg-[#556B5C]/10 px-1.5 py-0.5 rounded-xs mt-1">
                         <Calendar className="w-3 h-3" />
                         Alquiler
                         {item.rental_start_date && ` (${item.rental_start_date})`}
@@ -110,7 +133,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     )}
 
                     {item.customization && (
-                      <div className="mt-1 space-y-0.5 text-[10px] text-stone-600 bg-stone-50 p-1.5 rounded border border-stone-200">
+                      <div className="mt-2 space-y-0.5 text-[10px] text-stone-600 bg-stone-50 p-2 rounded-lg border border-stone-200">
                         {item.customization.balloonType && (
                           <p><strong className="text-stone-700">Globo:</strong> {item.customization.balloonType}</p>
                         )}
@@ -133,14 +156,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     )}
 
                     {item.dedication_message && (
-                      <p className="text-[10px] text-[#8C7A70] italic line-clamp-1 mt-0.5">
+                      <p className="text-[10px] text-[#8C7A70] italic line-clamp-1 mt-1">
                         "{item.dedication_message}"
                       </p>
                     )}
                   </div>
 
                   {/* Quantity and Price */}
-                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#F5EFEB]">
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#F5EFEB]">
                     <div className="flex items-center border border-[#D5C2B8] rounded bg-[#FAF8F5]">
                       <button
                         onClick={() =>
@@ -182,8 +205,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <span className="font-medium text-[#2E2421]">${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Envío estimado:</span>
-                <span className="text-[#763D8B] font-medium">Calculado en checkout</span>
+                <span>Entrega en Colón:</span>
+                <span className="text-[#763D8B] font-medium">Calculado por corregimiento en checkout</span>
               </div>
               <div className="flex justify-between text-base font-semibold text-[#2E2421] pt-2 border-t border-[#EBE2DB]">
                 <span>Total Estimado:</span>

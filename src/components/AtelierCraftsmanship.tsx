@@ -29,7 +29,7 @@ export const AtelierCraftsmanship: React.FC<AtelierCraftsmanshipProps> = ({
     {
       num: '04',
       title: 'Despacho Climatizado & Foto Previa',
-      desc: 'Antes de salir a la ruta en Ciudad de Panamá, recibes una fotografía en alta resolución de tu creación terminada por WhatsApp para tu absoluta tranquilidad.',
+      desc: 'Antes de salir a la ruta en Ciudad de Colón, recibes una fotografía en alta resolución de tu creación terminada por WhatsApp para tu absoluta tranquilidad.',
     },
   ];
 
@@ -42,7 +42,7 @@ export const AtelierCraftsmanship: React.FC<AtelierCraftsmanshipProps> = ({
           <div className="inline-flex items-center gap-2.5 text-[10px] sm:text-[11px] font-semibold tracking-[0.26em] uppercase text-[#7D5B28] mb-3">
             <span>SAVOIR-FAIRE ARTISANAL</span>
             <span className="text-[#C5A059]">✦</span>
-            <span>PANAMÁ</span>
+            <span>COLÓN</span>
           </div>
 
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#241A23] font-light tracking-tight leading-tight">
@@ -93,7 +93,7 @@ export const AtelierCraftsmanship: React.FC<AtelierCraftsmanshipProps> = ({
                     Taller & Boutique
                   </span>
                   <span className="font-serif text-sm font-light">
-                    Ciudad de Panamá
+                    Ciudad de Colón
                   </span>
                 </div>
               </div>

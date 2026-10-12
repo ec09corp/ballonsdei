@@ -421,27 +421,28 @@ export const AdminCustomizerElements: React.FC = () => {
       {/* MODAL: ADD / EDIT ELEMENT                                 */}
       {/* ========================================================= */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-hidden">
           <div 
-            className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[90vh]"
+            className="bg-white rounded-2xl sm:rounded-3xl w-full max-w-lg shadow-2xl border border-stone-200 overflow-hidden flex flex-col max-h-[92dvh]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-stone-200 flex items-center justify-between shrink-0 bg-[#FAF8F5]">
               <h3 className="font-bold text-stone-900 text-base">
                 {editingItem ? 'Editar Elemento' : 'Nuevo Elemento del Personalizador'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-full"
+                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-full cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
-              {/* Name */}
-              <div>
+            <form onSubmit={handleSave} className="flex flex-col flex-1 overflow-hidden text-xs">
+              <div className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1">
+                {/* Name */}
+                <div>
                 <label className="font-semibold text-stone-800 block mb-1">
                   Nombre del Elemento:
                 </label>
@@ -566,24 +567,25 @@ export const AdminCustomizerElements: React.FC = () => {
                   className="w-4 h-4 accent-[#763D8B] cursor-pointer"
                 />
               </div>
+            </div>
 
-              {/* Submit Buttons */}
-              <div className="pt-4 border-t border-stone-200 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 text-xs font-semibold cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-bold uppercase tracking-wider shadow-xs cursor-pointer"
-                >
-                  Guardar Elemento
-                </button>
-              </div>
-            </form>
+            {/* Sticky Submit Buttons Footer */}
+            <div className="p-4 border-t border-stone-200 bg-white flex items-center justify-end gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-stone-300 text-stone-700 text-xs font-semibold cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2 rounded-xl bg-[#763D8B] hover:bg-[#602F72] text-white text-xs font-bold uppercase tracking-wider shadow-xs cursor-pointer"
+              >
+                Guardar Elemento
+              </button>
+            </div>
+          </form>
           </div>
         </div>
       )}

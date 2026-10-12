@@ -176,21 +176,23 @@ export const productService = {
 
     if (supabase && isSupabaseConfigured) {
       try {
+        const cleanCatId = (productData.category_id && productData.category_id.trim()) ? productData.category_id.trim() : null;
+
         // Ensure category exists to avoid Foreign Key violations in Supabase
-        if (productData.category_id) {
+        if (cleanCatId) {
           try {
             const { data: catExists } = await supabase
               .from('categories')
               .select('id')
-              .eq('id', productData.category_id)
+              .eq('id', cleanCatId)
               .maybeSingle();
 
             if (!catExists) {
-              const catName = productData.category_id.replace('cat-', '').replace(/-/g, ' ');
+              const catName = cleanCatId.replace('cat-', '').replace(/-/g, ' ');
               await supabase.from('categories').insert({
-                id: productData.category_id,
+                id: cleanCatId,
                 name: catName.charAt(0).toUpperCase() + catName.slice(1),
-                slug: productData.category_id.replace('cat-', ''),
+                slug: cleanCatId.replace('cat-', ''),
                 active: true,
               });
             }
@@ -207,7 +209,7 @@ export const productService = {
           price: Number(productData.price) || 0,
           previous_price: productData.previous_price ? Number(productData.previous_price) : null,
           sku: productData.sku || `BD-${Date.now().toString().slice(-4)}`,
-          category_id: productData.category_id,
+          category_id: cleanCatId,
           product_type: productData.product_type || 'product',
           gift_type: productData.gift_type || 'none',
           stock: Number(productData.stock) || 0,
@@ -345,6 +347,9 @@ export const productService = {
     productData: Partial<Product>,
     imageFiles?: { file?: File; url: string; position: 1 | 2 | 3 | 4 }[]
   ): Promise<{ product: Product | null; error: Error | null }> {
+    let dbError: Error | null = null;
+    const cleanCatId = (productData.category_id && productData.category_id.trim()) ? productData.category_id.trim() : null;
+
     if (supabase && isSupabaseConfigured) {
       try {
         const { error: prodError } = await supabase
@@ -355,7 +360,7 @@ export const productService = {
             price: Number(productData.price),
             previous_price: productData.previous_price ? Number(productData.previous_price) : null,
             sku: productData.sku,
-            category_id: productData.category_id,
+            category_id: cleanCatId,
             product_type: productData.product_type,
             gift_type: productData.gift_type,
             stock: Number(productData.stock),
@@ -373,7 +378,10 @@ export const productService = {
           })
           .eq('id', id);
 
-        if (!prodError && imageFiles && imageFiles.length > 0) {
+        if (prodError) {
+          console.warn('Supabase update notice:', prodError.message);
+          dbError = new Error(prodError.message);
+        } else if (imageFiles && imageFiles.length > 0) {
           // Remove old images
           await supabase.from('product_images').delete().eq('product_id', id);
 
@@ -396,6 +404,7 @@ export const productService = {
         }
       } catch (err: any) {
         console.warn('Supabase update warning:', err);
+        dbError = err;
       }
     }
 
@@ -414,6 +423,7 @@ export const productService = {
         return {
           ...p,
           ...productData,
+          category_id: cleanCatId || p.category_id,
           images: updatedImages,
         };
       }
@@ -422,7 +432,7 @@ export const productService = {
 
     saveLocalProducts(localList);
     const updated = localList.find((p) => p.id === id) || null;
-    return { product: updated, error: null };
+    return { product: updated, error: dbError };
   },
 
   async updateStock(id: string, newStock: number): Promise<boolean> {
@@ -480,5 +490,103 @@ export const productService = {
   async resetToDefaults(): Promise<Product[]> {
     saveLocalProducts(INITIAL_PRODUCTS);
     return INITIAL_PRODUCTS;
+  },
+
+  async syncAllProductsToSupabase(): Promise<{ success: boolean; syncedCount: number; error: string | null }> {
+    if (!supabase || !isSupabaseConfigured) {
+      return { 
+        success: false, 
+        syncedCount: 0, 
+        error: 'Supabase no está configurado aún. Ve a Ajustes > Supabase para ingresar tu URL y clave anónima.' 
+      };
+    }
+
+    const localList = getLocalProducts();
+    if (localList.length === 0) {
+      return { success: true, syncedCount: 0, error: null };
+    }
+
+    let syncedCount = 0;
+    let lastError: string | null = null;
+
+    for (const prod of localList) {
+      try {
+        const cleanCatId = (prod.category_id && prod.category_id.trim()) ? prod.category_id.trim() : null;
+        if (cleanCatId) {
+          try {
+            const { data: catExists } = await supabase
+              .from('categories')
+              .select('id')
+              .eq('id', cleanCatId)
+              .maybeSingle();
+
+            if (!catExists) {
+              const catName = cleanCatId.replace('cat-', '').replace(/-/g, ' ');
+              await supabase.from('categories').insert({
+                id: cleanCatId,
+                name: catName.charAt(0).toUpperCase() + catName.slice(1),
+                slug: cleanCatId.replace('cat-', ''),
+                active: true,
+              });
+            }
+          } catch {}
+        }
+
+        const payload: any = {
+          id: prod.id,
+          name: prod.name,
+          slug: prod.slug,
+          description: prod.description || '',
+          price: Number(prod.price) || 0,
+          previous_price: prod.previous_price ? Number(prod.previous_price) : null,
+          sku: prod.sku || `BD-${Date.now().toString().slice(-4)}`,
+          category_id: cleanCatId,
+          product_type: prod.product_type || 'product',
+          gift_type: prod.gift_type || 'none',
+          stock: Number(prod.stock) || 0,
+          minimum_stock: Number(prod.minimum_stock) || 2,
+          active: prod.active ?? true,
+          featured: prod.featured ?? false,
+          is_new: prod.is_new ?? true,
+          available_for_rental: prod.available_for_rental ?? false,
+          rental_price: prod.rental_price ? Number(prod.rental_price) : null,
+          rental_deposit: prod.rental_deposit ? Number(prod.rental_deposit) : null,
+          rental_conditions: prod.rental_conditions || null,
+          size: prod.size || null,
+          color: prod.color || null,
+          tags: prod.tags || null,
+        };
+
+        const { error: upsertErr } = await supabase
+          .from('products')
+          .upsert(payload);
+
+        if (upsertErr) {
+          lastError = upsertErr.message;
+        } else {
+          syncedCount++;
+          if (prod.images && prod.images.length > 0) {
+            await supabase.from('product_images').delete().eq('product_id', prod.id);
+            for (const img of prod.images.slice(0, 4)) {
+              if (img.image_url) {
+                await supabase.from('product_images').insert({
+                  product_id: prod.id,
+                  image_url: img.image_url,
+                  position: img.position || 1,
+                });
+              }
+            }
+          }
+        }
+      } catch (err: any) {
+        lastError = err.message || String(err);
+      }
+    }
+
+    return {
+      success: syncedCount > 0 || !lastError,
+      syncedCount,
+      error: lastError,
+    };
   },
 };
